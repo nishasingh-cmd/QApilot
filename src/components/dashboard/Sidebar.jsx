@@ -13,7 +13,8 @@ import {
   Settings,
   LogOut,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  FileText
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -22,6 +23,7 @@ const MENU_ITEMS = [
   { name: 'Repositories', icon: FolderGit2, path: '/dashboard/repos' },
   { name: 'AI Scans', icon: Zap, path: '/dashboard/scans' },
   { name: 'AI Findings', icon: ShieldAlert, path: '/dashboard/bugs' },
+  { name: 'AI Reports', icon: FileText, path: '/dashboard/reports' },
   { name: 'Test Runs', icon: Terminal, path: '/dashboard/runs' },
   { name: 'Analytics', icon: TrendingUp, path: '/dashboard/analytics' },
   { name: 'Team', icon: Users, path: '/dashboard/team' },
