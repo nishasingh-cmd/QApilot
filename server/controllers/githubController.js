@@ -1,4 +1,5 @@
 import { getGitHubToken, getGitHubUserRepos } from "../services/githubService.js";
+import { saveRepositories } from "../services/repositoryService.js";
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 
@@ -25,9 +26,12 @@ export const githubCallback = async (req, res) => {
     user.githubId = token;
     await user.save();
 
+    // SAVE INTO DB
+    const savedRepos = await saveRepositories(repos, user._id);
+
     res.json({
-      message: "GitHub connected successfully",
-      repos
+      message: "GitHub connected & repositories synced",
+      repositories: savedRepos
     });
 
   } catch (error) {
