@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CONNECTED_REPOS, AVAILABLE_REPOS } from '../data/repositories';
 import { RepositoryStats } from '../components/repositories/RepositoryStats';
@@ -7,14 +8,25 @@ import { RepositoryFilters } from '../components/repositories/RepositoryFilters'
 import { RepositoryCard } from '../components/repositories/RepositoryCard';
 import { RepositoryEmptyState } from '../components/repositories/RepositoryEmptyState';
 import { RepositoryModal } from '../components/repositories/RepositoryModal';
+import { useGitHub } from '../context/GitHubContext';
+import { IntegrationStatusCard } from '../components/github/IntegrationStatusCard';
 
 export function Repositories() {
-  const [connected, setConnected] = useState(CONNECTED_REPOS);
+  const navigate = useNavigate();
+  const { connectionStatus, githubUser, importedRepos, disconnectGitHub, error } = useGitHub();
+
+  // Combine standard mock repos with dynamically imported ones
+  const [connected, setConnected] = useState([...importedRepos, ...CONNECTED_REPOS]);
   const [available, setAvailable] = useState(AVAILABLE_REPOS);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Sync state if importedRepos changes
+  useEffect(() => {
+    setConnected([...importedRepos, ...CONNECTED_REPOS]);
+  }, [importedRepos]);
 
   // Handle connecting a repo from the modal
   const handleConnectRepo = (repo) => {
@@ -110,11 +122,24 @@ export function Repositories() {
   return (
     <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-extrabold text-white tracking-tight">Repositories</h1>
-        <p className="text-[13px] text-brand-text-secondary mt-1">
-          Manage and monitor all connected repositories from one place.
-        </p>
+      <div className="mb-8 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">Repositories</h1>
+          <p className="text-[13px] text-brand-text-secondary mt-1">
+            Manage and monitor all connected repositories from one place.
+          </p>
+        </div>
+      </div>
+
+      {/* GitHub Integration Status Banner */}
+      <div className="mb-6">
+        <IntegrationStatusCard
+          status={connectionStatus}
+          githubUser={githubUser}
+          onConnect={() => navigate('/dashboard/connect-github')}
+          onDisconnect={disconnectGitHub}
+          error={error}
+        />
       </div>
 
       {/* Repository Stats overview */}

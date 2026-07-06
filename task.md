@@ -1,0 +1,21 @@
+# QAPilot — Phase 4.1: GitHub Integration Task List
+
+- [x] Create Service Layer Abstractions
+  - [x] `githubService.js`: Simulated connections, token revocations, and repo fetchers
+  - [x] `repositoryService.js`: Simulated repo import and scan configuration savers
+- [x] State Management Integration
+  - [x] `GitHubContext.jsx`: Wizard stepper tracking, selections, and connection error handling
+  - [x] Wire up `<GitHubProvider>` in `App.jsx`
+- [x] Create Onboarding Wizard Components (`src/components/github/`)
+  - [x] `GitHubConnectCard`: Step 1 landing introduction view
+  - [x] `OAuthProgress`: Step 2 progress tracker animation overlay
+  - [x] `RepositoryImportTable`: Step 3 table listing visible github repos with selection logic
+  - [x] `RepositorySelector`: Step 4 selected repositories preview item list
+  - [x] `ScanConfiguration`: Step 4 toggles for automation, email fields, and AI sensitivity selectors
+  - [x] `ConnectionSuccess`: Step 5 checkout success panels with dashboard redirects
+  - [x] `IntegrationStatusCard`: Reusable integration status headers
+- [x] Pages & Routing Setup
+  - [x] Create page view `ConnectGithub.jsx`
+  - [x] Map `/dashboard/connect-github` route inside `AppRoutes.jsx`
+  - [x] Integrate `IntegrationStatusCard` and session-synced repository listings in `Repositories.jsx`
+- [x] Verify production build runs successfully — ✅ compiled successfully in 4.02s
