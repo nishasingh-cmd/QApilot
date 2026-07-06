@@ -3,11 +3,14 @@ import { Routes, Route } from 'react-router-dom';
 import { PublicLayout } from '../components/layout/PublicLayout';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { Home } from '../pages/Home';
-import { Login } from '../pages/Login';
-import { Signup } from '../pages/Signup';
-import { ForgotPassword } from '../pages/ForgotPassword';
 import { Dashboard } from '../pages/Dashboard';
 import { NotFound } from '../pages/NotFound';
+import { AuthLayout } from '../components/auth/AuthLayout';
+import { Login } from '../pages/auth/Login';
+import { Signup } from '../pages/auth/Signup';
+import { ForgotPassword } from '../pages/auth/ForgotPassword';
+import { ResetPassword } from '../pages/auth/ResetPassword';
+import { VerifyEmail } from '../pages/auth/VerifyEmail';
 
 export function AppRoutes() {
   return (
@@ -15,10 +18,15 @@ export function AppRoutes() {
       {/* Public Layout Routes */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
       </Route>
+
+      {/* Auth Layout Routes */}
+      <Route path="/login" element={<AuthLayout><Login /></AuthLayout>} />
+      <Route path="/signup" element={<AuthLayout><Signup /></AuthLayout>} />
+      <Route path="/forgot-password" element={<AuthLayout><ForgotPassword /></AuthLayout>} />
+      <Route path="/reset-password" element={<AuthLayout><ResetPassword /></AuthLayout>} />
+      <Route path="/verify-email" element={<AuthLayout><VerifyEmail /></AuthLayout>} />
+
 
       {/* Dashboard Layout Routes */}
       <Route element={<DashboardLayout />}>
