@@ -9,6 +9,10 @@ import { TrustedLogos } from '../sections/TrustedLogos';
 import { FeaturesSection } from '../sections/FeaturesSection';
 import { HighlightChips } from '../sections/HighlightChips';
 import { WhySection } from '../sections/WhySection';
+import { ProductShowcase } from '../sections/ProductShowcase';
+import { HowItWorks } from '../sections/HowItWorks';
+import { Testimonials } from '../sections/Testimonials';
+import { CallToAction } from '../sections/CallToAction';
 
 // Shared animation variants
 const containerVariants = {
@@ -197,6 +201,26 @@ export function Home() {
 
       {/* ─── WHY QAPILOT ─────────────────────────────────────────────────── */}
       <WhySection />
+
+      <SectionDivider />
+
+      {/* ─── PRODUCT SHOWCASE ─────────────────────────────────────────────── */}
+      <ProductShowcase />
+
+      <SectionDivider />
+
+      {/* ─── HOW IT WORKS ─────────────────────────────────────────────────── */}
+      <HowItWorks />
+
+      <SectionDivider />
+
+      {/* ─── TESTIMONIALS ─────────────────────────────────────────────────── */}
+      <Testimonials />
+
+      <SectionDivider />
+
+      {/* ─── CALL TO ACTION ───────────────────────────────────────────────── */}
+      <CallToAction />
 
     </div>
   );
