@@ -21,7 +21,7 @@ const MENU_ITEMS = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
   { name: 'Repositories', icon: FolderGit2, path: '/dashboard/repos' },
   { name: 'AI Scans', icon: Zap, path: '/dashboard/scans' },
-  { name: 'Bug Reports', icon: ShieldAlert, path: '/dashboard/bugs' },
+  { name: 'AI Findings', icon: ShieldAlert, path: '/dashboard/bugs' },
   { name: 'Test Runs', icon: Terminal, path: '/dashboard/runs' },
   { name: 'Analytics', icon: TrendingUp, path: '/dashboard/analytics' },
   { name: 'Team', icon: Users, path: '/dashboard/team' },
