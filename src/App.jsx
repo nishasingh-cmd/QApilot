@@ -6,6 +6,8 @@ import { ScanProvider } from './context/ScanContext';
 import { FindingsProvider } from './context/FindingsContext';
 import { AnalyticsProvider } from './context/AnalyticsContext';
 import { ReportsProvider } from './context/ReportsContext';
+import { NotificationsProvider } from './context/NotificationsContext';
+import { ToastContainer } from './components/ui/ToastContainer';
 
 function App() {
   return (
@@ -15,7 +17,10 @@ function App() {
           <FindingsProvider>
             <AnalyticsProvider>
               <ReportsProvider>
-                <AppRoutes />
+                <NotificationsProvider>
+                  <AppRoutes />
+                  <ToastContainer />
+                </NotificationsProvider>
               </ReportsProvider>
             </AnalyticsProvider>
           </FindingsProvider>

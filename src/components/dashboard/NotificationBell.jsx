@@ -1,128 +1,97 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Bell, Check, Info, AlertTriangle, ShieldCheck } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const NOTIFICATIONS = [
-  {
-    id: 1,
-    type: 'success',
-    title: 'AI Scan Passed',
-    desc: 'Repository main branch code audit success.',
-    time: '5 mins ago',
-    icon: ShieldCheck,
-    color: 'text-brand-success bg-brand-success/10 border-brand-success/20',
-  },
-  {
-    id: 2,
-    type: 'danger',
-    title: 'Critical Bug Detected',
-    desc: 'Potential XSS injection risk inside Input.jsx.',
-    time: '12 mins ago',
-    icon: AlertTriangle,
-    color: 'text-brand-danger bg-brand-danger/10 border-brand-danger/20',
-  },
-  {
-    id: 3,
-    type: 'info',
-    title: 'Deployment Completed',
-    desc: 'Vercel preview generated for PR #12.',
-    time: '2 hours ago',
-    icon: Info,
-    color: 'text-brand-blue bg-brand-blue/10 border-brand-blue/20',
-  },
-];
+import { useNotifications } from '../../context/NotificationsContext';
+import { Bell, CheckCircle2, ChevronRight, Inbox } from 'lucide-react';
+import { NotificationItem } from '../notifications/NotificationItem';
 
 export function NotificationBell() {
+  const { notifications, allNotifications, unreadCount, markAllAsRead } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
-  const [list, setList] = useState(NOTIFICATIONS);
   const containerRef = useRef(null);
 
+  // Close dropdown on click outside
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
+    const handleOutsideClick = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
         setIsOpen(false);
       }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
-  function clearAll() {
-    setList([]);
-  }
-
-  const unreadCount = list.length;
+  const latest5 = allNotifications.slice(0, 5);
 
   return (
-    <div className="relative" ref={containerRef}>
-      {/* Bell Trigger button */}
+    <div className="relative select-none" ref={containerRef}>
+      {/* Bell Toggle Icon */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-brand-text-secondary hover:text-white border border-white/[0.06] rounded-xl bg-white/[0.01] hover:bg-white/[0.05] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
-        aria-label={`Notifications, ${unreadCount} unread`}
-        aria-expanded={isOpen}
+        className="relative p-2 rounded-xl bg-white/[0.02] hover:bg-white/[0.08] border border-white/[0.06] hover:border-white/[0.12] text-brand-text-secondary hover:text-white transition-all cursor-pointer focus-visible:outline-none"
+        aria-label="View notifications preview"
       >
-        <Bell size={18} />
+        <Bell className="w-4.5 h-4.5" />
         {unreadCount > 0 && (
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-cyan animate-pulse" />
+          <span className="absolute -top-0.5 -right-0.5 min-w-[15px] h-[15px] px-1 rounded-full bg-brand-blue border border-[#07090F] text-[9px] font-black text-white flex items-center justify-center animate-pulse">
+            {unreadCount}
+          </span>
         )}
       </button>
 
-      {/* Popover list container */}
+      {/* Dropdown panel */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 8, scale: 0.96 }}
+            initial={{ opacity: 0, y: 10, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.96 }}
-            transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="absolute right-0 mt-2 z-50 w-80 rounded-xl border border-white/[0.08] bg-brand-bg-secondary/95 backdrop-blur-xl p-1.5 shadow-2xl shadow-black/80"
+            exit={{ opacity: 0, y: 10, scale: 0.96 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 350 }}
+            className="absolute right-0 mt-2.5 w-[320px] sm:w-[360px] bg-[#0b0e14]/95 border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden z-50 flex flex-col backdrop-blur-xl"
           >
-            <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06] select-none">
-              <span className="text-[12px] font-bold text-white">Notifications</span>
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-white/[0.06] bg-white/[0.005]">
+              <span className="text-[11px] font-black text-white">Notifications ({unreadCount} unread)</span>
               {unreadCount > 0 && (
                 <button
-                  onClick={clearAll}
-                  className="text-[10px] font-bold text-brand-blue hover:text-brand-cyan transition-colors"
+                  onClick={markAllAsRead}
+                  className="flex items-center gap-1 text-[9px] font-bold text-brand-blue hover:text-brand-blue/80 transition-colors uppercase tracking-wider cursor-pointer"
                 >
-                  Mark as read
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  Mark all read
                 </button>
               )}
             </div>
 
-            <div className="max-h-64 overflow-y-auto py-1 flex flex-col gap-1">
-              {list.length > 0 ? (
-                list.map((n) => {
-                  const ItemIcon = n.icon;
-                  return (
-                    <div
-                      key={n.id}
-                      className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-white/[0.02] cursor-default transition-colors duration-150"
-                    >
-                      <div className={`p-1.5 rounded-lg border shrink-0 ${n.color}`}>
-                        <ItemIcon size={14} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="text-[12px] font-bold text-white truncate">{n.title}</p>
-                          <span className="text-[9px] text-brand-text-muted shrink-0">{n.time}</span>
-                        </div>
-                        <p className="text-[11px] text-brand-text-secondary leading-snug mt-0.5">
-                          {n.desc}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="py-8 text-center text-[12px] text-brand-text-muted select-none">
-                  🎉 No new notifications. All caught up!
+            {/* List preview (max 5) */}
+            <div className="max-h-[300px] overflow-y-auto p-3 space-y-2 divide-y divide-white/[0.03]">
+              {latest5.length === 0 ? (
+                <div className="py-8 flex flex-col items-center gap-2 text-center select-none">
+                  <Inbox className="w-6 h-6 text-brand-text-secondary/30" />
+                  <span className="text-[11px] text-brand-text-secondary/60 font-medium">No recent notifications</span>
                 </div>
+              ) : (
+                latest5.map((n, index) => (
+                  <div key={n.id} className={index > 0 ? "pt-2" : ""}>
+                    <NotificationItem notification={n} compact={true} />
+                  </div>
+                ))
               )}
             </div>
+
+            {/* Footer View All shortcut */}
+            <Link
+              to="/dashboard/notifications"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center justify-center gap-1.5 p-3.5 border-t border-white/[0.06] hover:bg-white/[0.02] text-[11px] font-bold text-brand-text-secondary hover:text-white transition-all text-center border-none"
+            >
+              See all notifications
+              <ChevronRight className="w-4 h-4" />
+            </Link>
           </motion.div>
         )}
       </AnimatePresence>
     </div>
   );
 }
+export default NotificationBell;
