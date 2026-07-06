@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
+import githubRoutes from "./routes/githubRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -20,6 +21,7 @@ app.use(cookieParser());
 
 // routes
 app.use("/api/auth", authRoutes);
+app.use("/api/github", githubRoutes);
 
 app.get("/", (req, res) => {
   res.send("QAPilot API Running 🚀");
