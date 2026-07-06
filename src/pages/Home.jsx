@@ -13,6 +13,9 @@ import { ProductShowcase } from '../sections/ProductShowcase';
 import { HowItWorks } from '../sections/HowItWorks';
 import { Testimonials } from '../sections/Testimonials';
 import { CallToAction } from '../sections/CallToAction';
+import { Pricing } from '../sections/Pricing';
+import { FAQ } from '../sections/FAQ';
+import { Newsletter } from '../components/common/Newsletter';
 
 // Shared animation variants
 const containerVariants = {
@@ -221,6 +224,23 @@ export function Home() {
 
       {/* ─── CALL TO ACTION ───────────────────────────────────────────────── */}
       <CallToAction />
+
+      <SectionDivider />
+
+      {/* ─── PRICING ───────────────────────────────────────────────────── */}
+      <Pricing />
+
+      <SectionDivider />
+
+      {/* ─── FAQ ──────────────────────────────────────────────────────── */}
+      <FAQ />
+
+      <SectionDivider />
+
+      {/* ─── NEWSLETTER ─────────────────────────────────────────────────── */}
+      <div className="pb-20">
+        <Newsletter />
+      </div>
 
     </div>
   );

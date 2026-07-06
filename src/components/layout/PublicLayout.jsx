@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Logo } from '../common/Logo';
 import { Container } from '../common/Container';
 import { Button } from '../ui/Button';
+import { Footer } from '../common/Footer';
+import { ScrollToTop } from '../common/ScrollToTop';
 
 export function PublicLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -169,6 +171,12 @@ export function PublicLayout() {
       <main className="flex-1">
         <Outlet />
       </main>
+
+      {/* Global Footer */}
+      <Footer />
+
+      {/* Floating scroll-to-top button */}
+      <ScrollToTop />
     </div>
   );
 }
