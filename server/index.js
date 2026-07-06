@@ -6,6 +6,7 @@ import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import githubRoutes from "./routes/githubRoutes.js";
 import repositoryRoutes from "./routes/repositoryRoutes.js";
+import { startSyncScheduler } from "./services/syncScheduler.js";
 
 dotenv.config();
 connectDB();
@@ -33,4 +34,6 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  // Start background auto sync engine scheduler
+  startSyncScheduler(5);
 });
