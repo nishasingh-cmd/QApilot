@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useScans } from '../context/ScanContext';
 import { ScanMetricCard } from '../components/scans/ScanMetricCard';
@@ -13,11 +13,11 @@ import {
   Activity,
   CheckCircle2,
   AlertTriangle,
-  Play,
-  RotateCw,
   Clock,
   Plus,
   Compass,
+  Database,
+  Sparkles
 } from 'lucide-react';
 
 export function Scans() {
@@ -41,11 +41,20 @@ export function Scans() {
     triggerCancelScan,
     triggerRetryScan,
     resetFilters,
+    repositories,
+    mode
   } = useScans();
 
   const [isNewScanOpen, setIsNewScanOpen] = useState(false);
   const [repoSelect, setRepoSelect] = useState('qapilot-web');
   const [branchSelect, setBranchSelect] = useState('main');
+
+  // Auto select first database repository when loaded in live mode
+  useEffect(() => {
+    if (mode === 'live' && repositories.length > 0) {
+      setRepoSelect(repositories[0]._id);
+    }
+  }, [repositories, mode]);
 
   const handleStartScan = (e) => {
     e.preventDefault();
@@ -55,21 +64,40 @@ export function Scans() {
 
   // Filter history list based on client filter selection
   const filteredHistory = history.filter((run) => {
-    if (filterRepo !== 'all' && run.repoName !== filterRepo) return false;
+    if (filterRepo !== 'all') {
+      if (mode === 'live') {
+        if (run.repoId !== filterRepo && run.repoId?._id !== filterRepo) return false;
+      } else {
+        if (run.repoName !== filterRepo) return false;
+      }
+    }
     if (filterStatus !== 'all' && run.status !== filterStatus) return false;
     if (filterBranch !== 'all' && run.branch !== filterBranch) return false;
-    // Basic mock time filter logic
-    if (filterTime === '24h' && !run.completedAt.includes('min') && !run.completedAt.includes('now')) return false;
-    if (filterTime === '7d' && run.completedAt.includes('days') && parseInt(run.completedAt) > 7) return false;
+    
+    // Time filters
+    if (filterTime === '24h' && !run.completedAt.includes('min') && !run.completedAt.includes('now') && !run.completedAt.includes(':')) return false;
     return true;
   });
 
   return (
-    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto select-none">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">AI Scans</h1>
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl font-extrabold text-white tracking-tight">AI Scans</h1>
+            {mode === 'live' ? (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-bold border bg-emerald-500/10 border-emerald-500/20 text-emerald-400">
+                <Database className="w-2.5 h-2.5" />
+                Live DB Sync
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-bold border bg-amber-500/10 border-amber-500/20 text-amber-400">
+                <Sparkles className="w-2.5 h-2.5" />
+                Simulator Mode
+              </span>
+            )}
+          </div>
           <p className="text-[13px] text-brand-text-secondary mt-1">
             Monitor every repository scan, review quality metrics and inspect detected issues.
           </p>
@@ -78,7 +106,7 @@ export function Scans() {
         <div className="flex gap-2">
           <button
             onClick={() => setIsNewScanOpen(true)}
-            className="px-4 py-2.5 rounded-xl bg-brand-blue hover:bg-brand-blue-hover text-white text-xs font-bold transition-all duration-300 flex items-center gap-2 hover:shadow-lg hover:shadow-brand-blue/20 border border-white/[0.08]"
+            className="px-4 py-2.5 rounded-xl bg-brand-blue hover:bg-brand-blue-hover text-white text-xs font-bold transition-all duration-300 flex items-center gap-2 hover:shadow-lg hover:shadow-brand-blue/20 border border-white/[0.08] cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             Start New Scan
@@ -102,7 +130,7 @@ export function Scans() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-md rounded-3xl bg-[#0b0e14]/90 border border-white/[0.08] p-6 shadow-2xl overflow-hidden"
+              className="relative w-full max-w-md rounded-3xl bg-[#0b0e14]/95 border border-white/[0.08] p-6 shadow-2xl overflow-hidden backdrop-blur-xl"
             >
               <h3 className="text-base font-extrabold text-white tracking-tight mb-4">Trigger AI Quality Scan</h3>
               <form onSubmit={handleStartScan} className="space-y-4">
@@ -113,11 +141,19 @@ export function Scans() {
                     onChange={(e) => setRepoSelect(e.target.value)}
                     className="w-full bg-[#07090f] border border-white/[0.08] text-white text-xs rounded-xl px-3 py-2.5 focus:outline-none"
                   >
-                    <option value="qapilot-web">qapilot-web</option>
-                    <option value="dashboard-ui">dashboard-ui</option>
-                    <option value="mobile-app">mobile-app</option>
-                    <option value="backend-api">backend-api</option>
-                    <option value="analytics-engine">analytics-engine</option>
+                    {mode === 'live' && repositories.length > 0 ? (
+                      repositories.map((r) => (
+                        <option key={r._id} value={r._id} className="bg-[#0b0e14]">{r.name}</option>
+                      ))
+                    ) : (
+                      <>
+                        <option value="qapilot-web">qapilot-web</option>
+                        <option value="dashboard-ui">dashboard-ui</option>
+                        <option value="mobile-app">mobile-app</option>
+                        <option value="backend-api">backend-api</option>
+                        <option value="analytics-engine">analytics-engine</option>
+                      </>
+                    )}
                   </select>
                 </div>
 
@@ -136,13 +172,13 @@ export function Scans() {
                   <button
                     type="button"
                     onClick={() => setIsNewScanOpen(false)}
-                    className="flex-1 py-2 text-center rounded-xl bg-white/[0.03] hover:bg-white/[0.08] text-brand-text-secondary hover:text-white border border-white/[0.06] text-xs font-bold transition-all"
+                    className="flex-1 py-2 text-center rounded-xl bg-white/[0.03] hover:bg-white/[0.08] text-brand-text-secondary hover:text-white border border-white/[0.06] text-xs font-bold transition-all cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 py-2 text-center rounded-xl bg-brand-blue hover:bg-brand-blue-hover text-white text-xs font-bold border border-white/[0.08] transition-all"
+                    className="flex-1 py-2 text-center rounded-xl bg-brand-blue hover:bg-brand-blue-hover text-white text-xs font-bold border border-white/[0.08] transition-all cursor-pointer"
                   >
                     Launch Scan
                   </button>
@@ -221,6 +257,8 @@ export function Scans() {
             filterTime={filterTime}
             setFilterTime={setFilterTime}
             onReset={resetFilters}
+            repositories={repositories}
+            mode={mode}
           />
           <ScanHistoryTable
             history={filteredHistory}

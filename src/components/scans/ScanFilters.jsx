@@ -11,8 +11,10 @@ export function ScanFilters({
   filterTime,
   setFilterTime,
   onReset,
+  repositories = [],
+  mode = 'simulator'
 }) {
-  const repos = ['all', 'qapilot-web', 'dashboard-ui', 'mobile-app', 'backend-api', 'design-system', 'analytics-engine'];
+  const staticRepos = ['all', 'qapilot-web', 'dashboard-ui', 'mobile-app', 'backend-api', 'design-system', 'analytics-engine'];
   const statuses = ['all', 'success', 'failed'];
   const branches = ['all', 'main', 'develop', 'release-2.0'];
   const ranges = [
@@ -47,11 +49,20 @@ export function ScanFilters({
             onChange={(e) => setFilterRepo(e.target.value)}
             className="w-full bg-[#0b0e14] border border-white/[0.08] hover:border-white/[0.15] text-white text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-brand-blue/50 focus:ring-1 focus:ring-brand-blue/30 transition-all cursor-pointer font-medium"
           >
-            {repos.map((r) => (
-              <option key={r} value={r}>
-                {r === 'all' ? 'All Repositories' : r}
-              </option>
-            ))}
+            {mode === 'live' && repositories.length > 0 ? (
+              <>
+                <option value="all">All Repositories</option>
+                {repositories.map((r) => (
+                  <option key={r._id} value={r._id}>{r.name}</option>
+                ))}
+              </>
+            ) : (
+              staticRepos.map((r) => (
+                <option key={r} value={r}>
+                  {r === 'all' ? 'All Repositories' : r}
+                </option>
+              ))
+            )}
           </select>
         </div>
 
