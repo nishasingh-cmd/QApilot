@@ -1,0 +1,110 @@
+@theme {
+  --color-brand-bg: #07090F;
+  --color-brand-bg-secondary: #0D1118;
+  --color-brand-surface: #131A24;
+  --color-brand-card: rgba(255, 255, 255, 0.04);
+  --color-brand-blue: #4F8CFF;
+  --color-brand-cyan: #4FD1FF;
+  --color-brand-success: #22C55E;
+  --color-brand-warning: #F59E0B;
+  --color-brand-danger: #EF4444;
+  --color-brand-text-primary: #FFFFFF;
+  --color-brand-text-secondary: #94A3B8;
+  --color-brand-text-muted: #64748B;
+  --color-brand-border: rgba(255, 255, 255, 0.08);
+
+  --radius-brand: 20px;
+  --radius-large-card: 24px;
+  --radius-button: 14px;
+
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Global resets and base layout styling */
+@layer base {
+  body {
+    background-color: var(--color-brand-bg);
+    color: var(--color-brand-text-primary);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+}
+
+/* Typography Hierarchy Utilities */
+@utility text-display {
+  font-size: 2.75rem;
+  @media (min-width: 768px) {
+    font-size: 3.5rem;
+  }
+  @media (min-width: 1024px) {
+    font-size: 4.5rem;
+  }
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+@utility text-heading {
+  font-size: 2rem;
+  @media (min-width: 768px) {
+    font-size: 2.5rem;
+  }
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.019em;
+}
+
+@utility text-title {
+  font-size: 1.25rem;
+  @media (min-width: 768px) {
+    font-size: 1.5rem;
+  }
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+@utility text-body {
+  font-size: 0.95rem;
+  @media (min-width: 768px) {
+    font-size: 1.05rem;
+  }
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+@utility text-caption {
+  font-size: 0.75rem;
+  @media (min-width: 768px) {
+    font-size: 0.825rem;
+  }
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+/* Grid overlay background pattern */
+@utility bg-grid-pattern {
+  background-size: 50px 50px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+}
+
+/* Custom Scrollbar for premium dark appearance */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-brand-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-brand-surface);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
