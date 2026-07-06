@@ -13,6 +13,7 @@ import { ResetPassword } from '../pages/auth/ResetPassword';
 import { VerifyEmail } from '../pages/auth/VerifyEmail';
 import { Repositories } from '../pages/Repositories';
 import { ConnectGithub } from '../pages/ConnectGithub';
+import { Scans } from '../pages/Scans';
 
 /** Premium placeholder screen shown for all Phase 3.2+ pages */
 function PlaceholderPage({ title, desc }) {
@@ -52,7 +53,7 @@ export function AppRoutes() {
         {/* Phase 3.2+ content — premium pages */}
         <Route path="/dashboard/repos" element={<Repositories />} />
         <Route path="/dashboard/connect-github" element={<ConnectGithub />} />
-        <Route path="/dashboard/scans" element={<PlaceholderPage title="AI Scans" desc="View all historical and running AI-powered quality scans across repositories." />} />
+        <Route path="/dashboard/scans" element={<Scans />} />
         <Route path="/dashboard/bugs" element={<PlaceholderPage title="Bug Reports" desc="Browse detected bugs, regressions, and security issues across all scans." />} />
         <Route path="/dashboard/runs" element={<PlaceholderPage title="Test Runs" desc="Inspect individual test run results, timings, and CI/CD pipeline outputs." />} />
         <Route path="/dashboard/analytics" element={<PlaceholderPage title="Analytics" desc="Visualise quality trends, test coverage, and deployment health over time." />} />

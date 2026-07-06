@@ -1,0 +1,15 @@
+# Set the default behavior to have git handle line endings automatically
+* text=auto
+
+# Declare files that will always have LF line endings on check-in
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.svg text eol=lf

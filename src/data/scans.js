@@ -1,0 +1,171 @@
+/**
+ * Mock data for the AI Scan Center (Phase 5.1)
+ */
+
+export const MOCK_METRICS = {
+  totalScans: 148,
+  runningScans: 2,
+  completedScans: 138,
+  failedScans: 8,
+  avgQualityScore: 89,
+  avgScanTime: '1m 24s',
+};
+
+export const MOCK_ACTIVE_SCANS = [
+  {
+    id: 'scan-active-1',
+    repoName: 'qapilot-web',
+    owner: 'qapilot',
+    branch: 'main',
+    elapsedTime: '45s',
+    estimatedTime: '1m 15s',
+    progress: 60,
+    currentStage: 'Running Tests', // stages: Preparing -> Installing Dependencies -> Running Tests -> Static Analysis -> Security Analysis -> Generating Report -> Completed
+    stages: [
+      { name: 'Preparing', status: 'completed' },
+      { name: 'Installing Dependencies', status: 'completed' },
+      { name: 'Running Tests', status: 'active' },
+      { name: 'Static Analysis', status: 'pending' },
+      { name: 'Security Analysis', status: 'pending' },
+      { name: 'Generating Report', status: 'pending' },
+    ],
+  },
+  {
+    id: 'scan-active-2',
+    repoName: 'mobile-app',
+    owner: 'acme-corp',
+    branch: 'fix-login-flow',
+    elapsedTime: '12s',
+    estimatedTime: '2m 10s',
+    progress: 15,
+    currentStage: 'Installing Dependencies',
+    stages: [
+      { name: 'Preparing', status: 'completed' },
+      { name: 'Installing Dependencies', status: 'active' },
+      { name: 'Running Tests', status: 'pending' },
+      { name: 'Static Analysis', status: 'pending' },
+      { name: 'Security Analysis', status: 'pending' },
+      { name: 'Generating Report', status: 'pending' },
+    ],
+  },
+];
+
+export const MOCK_QUEUE = [
+  {
+    id: 'queue-1',
+    repoName: 'backend-api',
+    owner: 'qapilot',
+    priority: 'high',
+    queuedTime: '3m ago',
+    expectedStart: 'In 30s',
+    status: 'queued',
+  },
+  {
+    id: 'queue-2',
+    repoName: 'analytics-engine',
+    owner: 'acme-corp',
+    priority: 'normal',
+    queuedTime: '8m ago',
+    expectedStart: 'In 2m',
+    status: 'queued',
+  },
+];
+
+export const MOCK_HISTORY = [
+  {
+    id: 'scan-hist-1',
+    repoName: 'qapilot-web',
+    owner: 'qapilot',
+    commit: 'a9f821c',
+    commitMessage: 'refactor(auth): switch to JWT tokens',
+    branch: 'main',
+    qualityScore: 97,
+    duration: '1m 12s',
+    status: 'success',
+    triggeredBy: 'Nisha Singh',
+    completedAt: '12 mins ago',
+  },
+  {
+    id: 'scan-hist-2',
+    repoName: 'dashboard-ui',
+    owner: 'qapilot',
+    commit: 'c4e512d',
+    commitMessage: 'feat(sidebar): add responsive drawer for tablet',
+    branch: 'develop',
+    qualityScore: 88,
+    duration: '1m 40s',
+    status: 'success',
+    triggeredBy: 'Nisha Singh',
+    completedAt: '45 mins ago',
+  },
+  {
+    id: 'scan-hist-3',
+    repoName: 'mobile-app',
+    owner: 'acme-corp',
+    commit: 'f3910ab',
+    commitMessage: 'fix(ios): prevent memory leak in webview container',
+    branch: 'main',
+    qualityScore: 62,
+    duration: '2m 15s',
+    status: 'failed',
+    triggeredBy: 'GitHub Push',
+    completedAt: '3 hours ago',
+  },
+  {
+    id: 'scan-hist-4',
+    repoName: 'design-system',
+    owner: 'qapilot',
+    commit: '9d2110c',
+    commitMessage: 'style: update color tokens for semantic alert chips',
+    branch: 'main',
+    qualityScore: 78,
+    duration: '48s',
+    status: 'success',
+    triggeredBy: 'GitHub Push',
+    completedAt: '2 days ago',
+  },
+  {
+    id: 'scan-hist-5',
+    repoName: 'analytics-engine',
+    owner: 'acme-corp',
+    commit: 'e210ab5',
+    commitMessage: 'perf: optimize chunk queries by indexing timestamp columns',
+    branch: 'release-2.0',
+    qualityScore: 92,
+    duration: '1m 30s',
+    status: 'success',
+    triggeredBy: 'Nisha Singh',
+    completedAt: '6 hours ago',
+  },
+];
+
+export const MOCK_QUALITY_SCORECARD = {
+  overallScore: 89,
+  codeCoverage: 76,
+  testCoverage: 84,
+  securityScore: 94,
+  performanceScore: 88,
+  maintainabilityScore: 91,
+};
+
+export const MOCK_STREAMING_LOGS = [
+  'Initializing scanning environment...',
+  'Fetching latest branch commitments from github.com...',
+  'Resolving dependency structures (package-lock.json)...',
+  'Installing dependencies via npm clean-install...',
+  'Installed 1,482 packages successfully in 12.4s.',
+  'Compiling TypeScript code...',
+  'Running code style audits (ESLint, Prettier)...',
+  'ESLint results: 0 errors, 4 warnings.',
+  'Executing Jest codebase unit tests...',
+  'PASS  src/tests/auth.test.js (4.2s)',
+  'PASS  src/tests/metrics.test.js (3.8s)',
+  'Test summary: 42 passed, 0 failed. Coverage: 76.2%',
+  'Initiating static code quality analysis...',
+  'Analyzing cyclomatic complexity indices...',
+  'Scanning codebase for exposed API tokens & secrets...',
+  'Evaluating potential cross-site scripting security risks...',
+  'Quality summary: Code Grade: A, Security Score: 94%',
+  'Generating AI report dashboard charts...',
+  'Scan completed successfully in 1m 24s.',
+];
