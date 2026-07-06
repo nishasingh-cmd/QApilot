@@ -4,6 +4,7 @@ import { AppRoutes } from './routes/AppRoutes';
 import { GitHubProvider } from './context/GitHubContext';
 import { ScanProvider } from './context/ScanContext';
 import { FindingsProvider } from './context/FindingsContext';
+import { AnalyticsProvider } from './context/AnalyticsContext';
 
 function App() {
   return (
@@ -11,7 +12,9 @@ function App() {
       <GitHubProvider>
         <ScanProvider>
           <FindingsProvider>
-            <AppRoutes />
+            <AnalyticsProvider>
+              <AppRoutes />
+            </AnalyticsProvider>
           </FindingsProvider>
         </ScanProvider>
       </GitHubProvider>

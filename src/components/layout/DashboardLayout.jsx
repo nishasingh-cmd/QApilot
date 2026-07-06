@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from '../dashboard/Sidebar';
 import { TopNavbar } from '../dashboard/TopNavbar';
+import { AnalyticsSkeleton } from '../analytics/AnalyticsSkeleton';
 
 export function DashboardLayout() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -33,7 +34,9 @@ export function DashboardLayout() {
 
         {/* Dynamic Nested Route Content Area */}
         <main className="flex-1 overflow-y-auto p-5 sm:p-6 md:p-8 bg-brand-bg/40 relative">
-          <Outlet />
+          <Suspense fallback={<AnalyticsSkeleton />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>

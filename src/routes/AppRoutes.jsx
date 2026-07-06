@@ -1,21 +1,23 @@
-import React from 'react';
+import React, { lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { PublicLayout } from '../components/layout/PublicLayout';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { Home } from '../pages/Home';
-import { Dashboard } from '../pages/Dashboard';
-import { NotFound } from '../pages/NotFound';
 import { AuthLayout } from '../components/auth/AuthLayout';
 import { Login } from '../pages/auth/Login';
 import { Signup } from '../pages/auth/Signup';
 import { ForgotPassword } from '../pages/auth/ForgotPassword';
 import { ResetPassword } from '../pages/auth/ResetPassword';
 import { VerifyEmail } from '../pages/auth/VerifyEmail';
-import { Repositories } from '../pages/Repositories';
-import { ConnectGithub } from '../pages/ConnectGithub';
-import { Scans } from '../pages/Scans';
-import { Findings } from '../pages/Findings';
+import { NotFound } from '../pages/NotFound';
 
+// Lazy-loaded premium dashboard modules
+const Dashboard = lazy(() => import('../pages/Dashboard').then(module => ({ default: module.Dashboard })));
+const Repositories = lazy(() => import('../pages/Repositories').then(module => ({ default: module.Repositories })));
+const ConnectGithub = lazy(() => import('../pages/ConnectGithub').then(module => ({ default: module.ConnectGithub })));
+const Scans = lazy(() => import('../pages/Scans').then(module => ({ default: module.Scans })));
+const Findings = lazy(() => import('../pages/Findings').then(module => ({ default: module.Findings })));
+const Analytics = lazy(() => import('../pages/Analytics').then(module => ({ default: module.Analytics })));
 
 /** Premium placeholder screen shown for all Phase 3.2+ pages */
 function PlaceholderPage({ title, desc }) {
@@ -25,8 +27,8 @@ function PlaceholderPage({ title, desc }) {
         🚧
       </div>
       <div className="flex flex-col gap-2 max-w-sm">
-        <h3 className="text-lg font-extrabold text-white tracking-tight">{title}</h3>
-        <p className="text-[13px] text-brand-text-secondary leading-relaxed">{desc}</p>
+        <h3 className="text-sm font-bold text-white tracking-wide">{title}</h3>
+        <p className="text-xs text-brand-text-secondary leading-relaxed">{desc}</p>
         <span className="text-[11px] font-bold uppercase tracking-widest text-brand-blue/60 mt-1">Coming in next phase</span>
       </div>
     </div>
@@ -58,7 +60,7 @@ export function AppRoutes() {
         <Route path="/dashboard/scans" element={<Scans />} />
         <Route path="/dashboard/bugs" element={<Findings />} />
         <Route path="/dashboard/runs" element={<PlaceholderPage title="Test Runs" desc="Inspect individual test run results, timings, and CI/CD pipeline outputs." />} />
-        <Route path="/dashboard/analytics" element={<PlaceholderPage title="Analytics" desc="Visualise quality trends, test coverage, and deployment health over time." />} />
+        <Route path="/dashboard/analytics" element={<Analytics />} />
         <Route path="/dashboard/team" element={<PlaceholderPage title="Team" desc="Manage workspace members, roles, and permissions." />} />
         <Route path="/dashboard/notifications" element={<PlaceholderPage title="Notifications" desc="Review all alerts, scan summaries, and activity across your workspace." />} />
         <Route path="/dashboard/settings" element={<PlaceholderPage title="Settings" desc="Configure integrations, tokens, webhooks, billing, and account preferences." />} />
@@ -69,3 +71,4 @@ export function AppRoutes() {
     </Routes>
   );
 }
+export default AppRoutes;
