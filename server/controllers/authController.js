@@ -78,4 +78,10 @@ export const loginUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-export default { registerUser, loginUser };
+
+// GET ME
+export const getMe = async (req, res) => {
+  res.json(req.user);
+};
+
+export default { registerUser, loginUser, getMe };
