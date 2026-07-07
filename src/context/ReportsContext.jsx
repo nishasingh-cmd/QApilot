@@ -32,6 +32,34 @@ export function ReportsProvider({ children }) {
       try {
         const data = await reportService.getReports();
         setReports(data);
+
+        if (data && data.length > 0) {
+          const critical = data.reduce((sum, r) => sum + (r.findings?.critical || 0), 0);
+          const resolved = data.reduce((sum, r) => sum + (r.findings?.resolved || 0), 0);
+          const avgScore = Math.round(
+            data.reduce((sum, r) => sum + (r.qualityScore || 0), 0) / data.length
+          );
+          const latest = data[0];
+
+          setMetrics({
+            generated: data.length,
+            latestScore: latest.qualityScore || 0,
+            avgScore: avgScore,
+            criticalOpen: critical,
+            resolved: resolved,
+            exportsThisMonth: data.reduce(
+              (sum, r) => sum + (r.timeline || []).filter((t) => t.type === 'Exported').length,
+              0
+            ),
+          });
+
+          setSummary({
+            mostImproved: data.length > 1 ? data[0].repo : 'N/A',
+            highestRisk: data.find((r) => (r.findings?.critical || 0) > 0)?.repo || 'None',
+            mostStable: data.find((r) => r.qualityScore >= 90)?.repo || latest.repo,
+            mostActive: latest.repo,
+          });
+        }
       } catch (err) {
         setError('Failed to fetch AI quality reports.');
       } finally {
@@ -90,12 +118,30 @@ export function ReportsProvider({ children }) {
     setGenerationLoading(true);
     try {
       const newRep = await reportService.generateReport(repo, branch);
-      setReports((prev) => [newRep, ...prev]);
-      setMetrics((prev) => ({
-        ...prev,
-        generated: prev.generated + 1,
-        latestScore: newRep.qualityScore,
-      }));
+      setReports((prev) => {
+        const updated = [newRep, ...prev];
+        const avgScore = Math.round(
+          updated.reduce((sum, r) => sum + (r.qualityScore || 0), 0) / updated.length
+        );
+        const critical = updated.reduce((sum, r) => sum + (r.findings?.critical || 0), 0);
+
+        setMetrics((prevMet) => ({
+          ...prevMet,
+          generated: updated.length,
+          latestScore: newRep.qualityScore || 0,
+          avgScore: avgScore,
+          criticalOpen: critical,
+        }));
+
+        setSummary({
+          mostImproved: updated.length > 1 ? updated[0].repo : 'N/A',
+          highestRisk: updated.find((r) => (r.findings?.critical || 0) > 0)?.repo || 'None',
+          mostStable: updated.find((r) => r.qualityScore >= 90)?.repo || newRep.repo,
+          mostActive: newRep.repo,
+        });
+
+        return updated;
+      });
       openPreview(newRep);
     } catch (err) {
       setError('Failed to generate report.');

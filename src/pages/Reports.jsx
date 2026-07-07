@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useReports } from '../context/ReportsContext';
 import { ReportsTable } from '../components/reports/ReportsTable';
@@ -9,8 +9,8 @@ import { RepositoryHealthSummary } from '../components/reports/RepositoryHealthS
 import { ExportCenter } from '../components/reports/ExportCenter';
 import { ShareReportModal } from '../components/reports/ShareReportModal';
 import { FileText, Plus, GitFork, AlertTriangle, CheckCircle2, ChevronRight, BarChart3, TrendingUp, Sparkles, Loader2 } from 'lucide-react';
+import axios from 'axios';
 
-const REPOS = ['qapilot-web', 'dashboard-ui', 'mobile-app', 'backend-api', 'design-system', 'analytics-engine'];
 const BRANCHES = ['main', 'develop', 'release-2.0', 'fix-login-flow', 'feat/dashboard-v2'];
 
 export function Reports() {
@@ -28,9 +28,26 @@ export function Reports() {
     generationLoading,
   } = useReports();
 
+  const [REPOS, setREPOS] = useState(['qapilot-web', 'dashboard-ui', 'mobile-app', 'backend-api', 'design-system', 'analytics-engine']);
   const [repoSelect, setRepoSelect] = useState(REPOS[0]);
   const [branchSelect, setBranchSelect] = useState(BRANCHES[0]);
   const [showGenModal, setShowGenModal] = useState(false);
+
+  useEffect(() => {
+    const fetchRepos = async () => {
+      try {
+        const res = await axios.get('http://localhost:5000/api/repositories', { withCredentials: true });
+        if (res.data && res.data.length > 0) {
+          const names = res.data.map((r) => r.name);
+          setREPOS(names);
+          setRepoSelect(names[0]);
+        }
+      } catch (err) {
+        console.warn('Live API repositories query unavailable, using defaults', err.message);
+      }
+    };
+    fetchRepos();
+  }, []);
 
   if (loading && reports.length === 0) {
     return (

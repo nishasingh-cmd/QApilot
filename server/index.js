@@ -7,6 +7,7 @@ import authRoutes from "./routes/authRoutes.js";
 import githubRoutes from "./routes/githubRoutes.js";
 import repositoryRoutes from "./routes/repositoryRoutes.js";
 import scanRoutes from "./routes/scanRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
 import { startSyncScheduler } from "./services/syncScheduler.js";
 
 dotenv.config();
@@ -27,6 +28,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/github", githubRoutes);
 app.use("/api/repositories", repositoryRoutes);
 app.use("/api/scan", scanRoutes);
+app.use("/api/reports", reportRoutes);
 
 app.get("/", (req, res) => {
   res.send("QAPilot API Running 🚀");

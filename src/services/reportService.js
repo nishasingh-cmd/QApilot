@@ -1,131 +1,110 @@
-/**
- * Mock AI Report Service.
- * Resolves async promises representing API endpoints.
- */
+import axios from 'axios';
 
-import { MOCK_REPORTS } from '../data/reports';
-
-let localReports = [...MOCK_REPORTS];
+const API_BASE = 'http://localhost:5000/api';
 
 export const reportService = {
-  getReports: () =>
-    new Promise((resolve) => setTimeout(() => resolve([...localReports]), 500)),
+  getReports: async () => {
+    const res = await axios.get(`${API_BASE}/reports`, { withCredentials: true });
+    return res.data;
+  },
 
-  getReport: (id) =>
-    new Promise((resolve, reject) =>
-      setTimeout(() => {
-        const found = localReports.find((r) => r.id === id);
-        if (found) resolve({ ...found });
-        else reject(new Error(`Report ${id} not found`));
-      }, 400)
-    ),
+  getReport: async (id) => {
+    const res = await axios.get(`${API_BASE}/reports/${id}`, { withCredentials: true });
+    return res.data;
+  },
 
-  generateReport: (repo, branch) =>
-    new Promise((resolve) =>
-      setTimeout(() => {
-        const newReport = {
-          id: `rep-${String(localReports.length + 1).padStart(3, '0')}`,
-          name: `Quality Report: ${repo} [${branch}] v1.0`,
-          repo,
-          branch,
-          generatedBy: 'Nisha Singh',
-          generatedAt: 'Just now',
-          qualityScore: Math.round(75 + Math.random() * 20),
-          status: 'ready',
-          version: 'v1.0',
-          metrics: {
-            coverage: Math.round(70 + Math.random() * 20),
-            security: Math.round(75 + Math.random() * 15),
-            performance: Math.round(80 + Math.random() * 15),
-            maintainability: Math.round(82 + Math.random() * 10),
-            accessibility: Math.round(72 + Math.random() * 18),
-            confidence: Math.round(92 + Math.random() * 6),
-          },
-          findings: {
-            critical: Math.round(Math.random() * 3),
-            high: Math.round(Math.random() * 5),
-            medium: Math.round(5 + Math.random() * 15),
-            low: Math.round(4 + Math.random() * 12),
-            resolved: 0,
-            ignored: 0,
-          },
-          summary: 'Newly generated quality audit report following code validation sweep.',
-          recommendations: {
-            priorityActions: ['Establish automated CI rules.', 'Configure code coverage checkers.'],
-            architecture: ['Review modular hook separations.'],
-            testing: ['Setup Jest integrations.'],
-            security: ['Sanitize process environment credentials.'],
-            performance: ['Minimize bundle dimensions.'],
-          },
-          timeline: [
-            { type: 'Created', user: 'Nisha Singh', date: 'Just now' },
-          ],
-        };
-        localReports = [newReport, ...localReports];
-        resolve(newReport);
-      }, 1500)
-    ),
+  generateReport: async (repoName, branch) => {
+    // 1. Fetch repositories to find corresponding ID
+    const reposRes = await axios.get(`${API_BASE}/repositories`, { withCredentials: true });
+    const repo = reposRes.data.find(
+      (r) => r.name === repoName || r.fullName === repoName || r._id === repoName
+    );
 
-  compareReports: (id1, id2) =>
-    new Promise((resolve, reject) =>
-      setTimeout(() => {
-        const r1 = localReports.find((r) => r.id === id1);
-        const r2 = localReports.find((r) => r.id === id2);
-        if (r1 && r2) {
-          resolve({
-            reportA: r1,
-            reportB: r2,
-            diff: {
-              quality: r2.qualityScore - r1.qualityScore,
-              coverage: r2.metrics.coverage - r1.metrics.coverage,
-              security: r2.metrics.security - r1.metrics.security,
-              performance: r2.metrics.performance - r1.metrics.performance,
-              findings:
-                (r2.findings.critical + r2.findings.high) -
-                (r1.findings.critical + r1.findings.high),
-            },
-          });
-        } else {
-          reject(new Error('One or both reports not found for comparison.'));
+    if (!repo) {
+      throw new Error(`Repository "${repoName}" is not imported in your workspace.`);
+    }
+
+    // 2. Query scan history for this repo and branch
+    const scansRes = await axios.get(`${API_BASE}/scan/history/${repo._id}`, { withCredentials: true });
+    let latestScan = scansRes.data.find((s) => s.status === 'success' && s.branch === branch);
+
+    // 3. If no successful scan exists, trigger a new scan in background and wait for it
+    if (!latestScan) {
+      const triggerRes = await axios.post(
+        `${API_BASE}/scan/run/${repo._id}`,
+        { branch: branch || 'main' },
+        { withCredentials: true }
+      );
+      const scanId = triggerRes.data._id;
+
+      // Poll scan status until success or failure
+      let attempts = 0;
+      while (attempts < 12) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const statusRes = await axios.get(`${API_BASE}/scan/result/${scanId}`, { withCredentials: true });
+        
+        if (statusRes.data.status === 'success') {
+          latestScan = statusRes.data;
+          break;
+        } else if (statusRes.data.status === 'failed') {
+          throw new Error('Automated quality scan failed. Cannot build reports.');
         }
-      }, 600)
-    ),
+        attempts++;
+      }
+    }
 
-  shareReport: (id, platform, recipient) =>
-    new Promise((resolve) =>
-      setTimeout(() => {
-        // Appends "Shared" event to the report's timeline
-        localReports = localReports.map((r) => {
-          if (r.id === id) {
-            const updatedTimeline = [
-              { type: 'Shared', user: 'Nisha Singh', date: 'Just now' },
-              ...r.timeline,
-            ];
-            return { ...r, timeline: updatedTimeline };
-          }
-          return r;
-        });
-        resolve({ success: true, platform, recipient });
-      }, 500)
-    ),
+    if (!latestScan) {
+      throw new Error(`No scan results available for branch "${branch}". Please run a scan first.`);
+    }
 
-  exportReport: (id, format) =>
-    new Promise((resolve) =>
-      setTimeout(() => {
-        // Appends "Exported" event to report's timeline
-        localReports = localReports.map((r) => {
-          if (r.id === id) {
-            const updatedTimeline = [
-              { type: 'Exported', user: 'Nisha Singh', date: 'Just now' },
-              ...r.timeline,
-            ];
-            return { ...r, timeline: updatedTimeline };
-          }
-          return r;
-        });
-        resolve({ success: true, format, downloadUrl: `https://qapilot.io/exports/${id}.${format}` });
-      }, 800)
-    ),
+    // 4. Generate report from scan
+    const res = await axios.post(`${API_BASE}/reports/generate/${latestScan._id}`, {}, { withCredentials: true });
+    return res.data;
+  },
+
+  compareReports: async (id1, id2) => {
+    const res = await axios.post(`${API_BASE}/reports/compare`, { reportId1: id1, reportId2: id2 }, { withCredentials: true });
+    return res.data;
+  },
+
+  shareReport: async (id, platform, recipient) => {
+    const res = await axios.post(`${API_BASE}/reports/${id}/share`, { platform, recipient }, { withCredentials: true });
+    return res.data;
+  },
+
+  exportReport: async (id, format) => {
+    const res = await axios.get(`${API_BASE}/reports/${id}/export?format=${format}`, {
+      withCredentials: true,
+      responseType: format === 'pdf' || format === 'json' ? 'json' : 'text'
+    });
+
+    let content = res.data;
+    let mimeType = 'text/plain';
+    
+    if (format === 'json' || format === 'pdf') {
+      content = JSON.stringify(content, null, 2);
+      mimeType = 'application/json';
+    } else if (format === 'csv') {
+      mimeType = 'text/csv';
+    } else if (format === 'markdown') {
+      mimeType = 'text/markdown';
+    } else if (format === 'html') {
+      mimeType = 'text/html';
+    }
+
+    const blob = new Blob([content], { type: mimeType });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    
+    link.href = url;
+    link.setAttribute('download', `report-${id}.${format === 'pdf' ? 'pdf.json' : format}`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+    
+    return { success: true };
+  }
 };
 
 export default reportService;
