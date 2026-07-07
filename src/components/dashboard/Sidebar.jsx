@@ -20,7 +20,8 @@ import {
   Bot,
   Rocket,
   Building2,
-  Shield
+  Shield,
+  CreditCard
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -40,6 +41,7 @@ const MENU_ITEMS = [
   { name: 'Background Jobs', icon: Cpu, path: '/dashboard/jobs' },
   { name: 'AI Assistant', icon: Bot, path: '/dashboard/assistant' },
   { name: 'Deployments', icon: Rocket, path: '/dashboard/deployments' },
+  { name: 'Billing', icon: CreditCard, path: '/dashboard/billing' },
   { name: 'Settings', icon: Settings, path: '/dashboard/settings' },
 ];
 

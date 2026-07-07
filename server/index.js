@@ -22,6 +22,10 @@ import workspaceRoutes from "./routes/workspaceRoutes.js";
 import memberRoutes from "./routes/memberRoutes.js";
 import invitationRoutes from "./routes/invitationRoutes.js";
 import auditRoutes from "./routes/auditRoutes.js";
+import billingRoutes from "./routes/billingRoutes.js";
+import invoiceRoutes from "./routes/invoiceRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
+import usageRoutes from "./routes/usageRoutes.js";
 import { startSyncScheduler } from "./services/syncScheduler.js";
 
 dotenv.config();
@@ -57,6 +61,10 @@ app.use("/api/workspaces", workspaceRoutes);
 app.use("/api", memberRoutes);
 app.use("/api/invitations", invitationRoutes);
 app.use("/api/audit", auditRoutes);
+app.use("/api/billing", billingRoutes);
+app.use("/api/invoices", invoiceRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/api/usage", usageRoutes);
 
 app.get("/", (req, res) => {
   res.send("QAPilot API Running 🚀");

@@ -30,6 +30,10 @@ const Workspace = lazy(() => import('../pages/Workspace').then(module => ({ defa
 const Members = lazy(() => import('../pages/Members').then(module => ({ default: module.Members })));
 const Invitations = lazy(() => import('../pages/Invitations').then(module => ({ default: module.Invitations })));
 const AuditLogs = lazy(() => import('../pages/AuditLogs').then(module => ({ default: module.AuditLogs })));
+const Billing = lazy(() => import('../pages/Billing').then(module => ({ default: module.Billing })));
+const Plans = lazy(() => import('../pages/Plans').then(module => ({ default: module.Plans })));
+const Invoices = lazy(() => import('../pages/Invoices').then(module => ({ default: module.Invoices })));
+const Usage = lazy(() => import('../pages/Usage').then(module => ({ default: module.Usage })));
 
 /** Premium placeholder screen shown for all Phase 3.2+ pages */
 function PlaceholderPage({ title, desc }) {
@@ -85,6 +89,10 @@ export function AppRoutes() {
         <Route path="/dashboard/members" element={<Members />} />
         <Route path="/dashboard/invitations" element={<Invitations />} />
         <Route path="/dashboard/audit" element={<AuditLogs />} />
+        <Route path="/dashboard/billing" element={<Billing />} />
+        <Route path="/dashboard/plans" element={<Plans />} />
+        <Route path="/dashboard/invoices" element={<Invoices />} />
+        <Route path="/dashboard/usage" element={<Usage />} />
         <Route path="/dashboard/settings" element={<Settings />} />
       </Route>
 
