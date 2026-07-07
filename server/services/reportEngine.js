@@ -45,7 +45,7 @@ export const generateReportFromScan = async (scanId, userId) => {
 
   // 5. Generate rule-based summaries and lists
   const scanWithDbFindings = { ...scan.toObject(), findings: databaseFindings };
-  const aiAnalysis = generateAiSummary(scanWithDbFindings, repo);
+  const aiAnalysis = await generateAiSummary(scanWithDbFindings, repo);
 
   // 6. Build category scores
   const categoryScores = {

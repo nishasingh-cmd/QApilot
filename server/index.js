@@ -14,6 +14,7 @@ import analyticsRoutes from "./routes/analyticsRoutes.js";
 import webhookRoutes from "./routes/webhookRoutes.js";
 import settingRoutes from "./routes/settingRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
+import assistantRoutes from "./routes/assistantRoutes.js";
 import { startSyncScheduler } from "./services/syncScheduler.js";
 
 dotenv.config();
@@ -41,6 +42,7 @@ app.use("/api/findings", findingRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/webhooks", webhookRoutes);
 app.use("/api/jobs", jobRoutes);
+app.use("/api/assistant", assistantRoutes);
 
 app.get("/", (req, res) => {
   res.send("QAPilot API Running 🚀");

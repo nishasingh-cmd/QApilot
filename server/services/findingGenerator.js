@@ -1,5 +1,7 @@
 import Finding from "../models/Finding.js";
 import Scan from "../models/Scan.js";
+import { generateAIResponse } from "./ai/aiProvider.js";
+import { generateFindingExplanationPrompt } from "../prompts/findingExplanation.js";
 
 /**
  * Maps raw rule scanner findings to persistent database Finding documents.
@@ -109,6 +111,32 @@ export const generateFindings = async (rawFindings, repositoryId, scanId, userId
       impact,
       assignedTo: ""
     });
+
+    // 3. Query AI Provider to enrich explanations asynchronously
+    try {
+      const prompt = generateFindingExplanationPrompt(doc);
+      const aiText = await generateAIResponse(prompt);
+      const aiData = JSON.parse(aiText);
+
+      if (aiData.whatItIs || aiData.whyItMatters) {
+        doc.aiExplanation = `${aiData.whatItIs || ""}\n\nWhy it matters: ${aiData.whyItMatters || ""}`;
+      }
+      if (aiData.recommendedFix) {
+        doc.recommendation = aiData.recommendedFix;
+      }
+      if (aiData.estimatedEffort) {
+        doc.effort = aiData.estimatedEffort;
+      }
+      if (aiData.securityImpact) {
+        doc.impact = aiData.securityImpact;
+      }
+      if (aiData.codeImprovement) {
+        doc.codeSnippet = aiData.codeImprovement;
+      }
+      await doc.save();
+    } catch (err) {
+      console.warn(`Failed to enrich finding ${doc.title} with LLM parameters:`, err.message);
+    }
 
     savedFindings.push(doc);
   }

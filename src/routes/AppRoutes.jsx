@@ -23,6 +23,7 @@ const Notifications = lazy(() => import('../pages/Notifications').then(module =>
 const Activity = lazy(() => import('../pages/Activity').then(module => ({ default: module.Activity })));
 const Settings = lazy(() => import('../pages/Settings').then(module => ({ default: module.Settings })));
 const Jobs = lazy(() => import('../pages/Jobs').then(module => ({ default: module.Jobs })));
+const AssistantPage = lazy(() => import('../pages/AssistantPage').then(module => ({ default: module.AssistantPage })));
 
 /** Premium placeholder screen shown for all Phase 3.2+ pages */
 function PlaceholderPage({ title, desc }) {
@@ -71,6 +72,7 @@ export function AppRoutes() {
         <Route path="/dashboard/notifications" element={<Notifications />} />
         <Route path="/dashboard/activity" element={<Activity />} />
         <Route path="/dashboard/jobs" element={<Jobs />} />
+        <Route path="/dashboard/assistant" element={<AssistantPage />} />
         <Route path="/dashboard/settings" element={<Settings />} />
       </Route>
 

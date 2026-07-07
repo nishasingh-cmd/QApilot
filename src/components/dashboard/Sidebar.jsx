@@ -16,7 +16,8 @@ import {
   ChevronRight,
   FileText,
   Activity,
-  Cpu
+  Cpu,
+  Bot
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -32,6 +33,7 @@ const MENU_ITEMS = [
   { name: 'Notifications', icon: Bell, path: '/dashboard/notifications' },
   { name: 'Activity Log', icon: Activity, path: '/dashboard/activity' },
   { name: 'Background Jobs', icon: Cpu, path: '/dashboard/jobs' },
+  { name: 'AI Assistant', icon: Bot, path: '/dashboard/assistant' },
   { name: 'Settings', icon: Settings, path: '/dashboard/settings' },
 ];
 
