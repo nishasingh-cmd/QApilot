@@ -1,0 +1,59 @@
+version: "3.9"
+
+# Production overrides — use alongside base: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
+services:
+  # ─── MongoDB (production) ───────────────────────────────────────────────────
+  mongo:
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # ─── Redis (production) ─────────────────────────────────────────────────────
+  redis:
+    restart: always
+    command: redis-server --save 60 1 --requirepass ${REDIS_PASSWORD} --loglevel warning
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # ─── Express API (production) ───────────────────────────────────────────────
+  server:
+    restart: always
+    environment:
+      NODE_ENV: production
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  # ─── Nginx (production only) — client + reverse proxy ───────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: qapilot_nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./dist:/usr/share/nginx/html:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - server
+    networks:
+      - qapilot_net
+    deploy:
+      resources:
+        limits:
+          memory: 128M

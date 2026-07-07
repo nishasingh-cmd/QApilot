@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+server/node_modules/
+
+# Build artifacts
+dist/
+.dist/
+
+# Version control
+.git/
+.gitignore
+.gitattributes
+
+# Environment secrets
+.env
+.env.local
+.env.production
+.env.development
+
+# Logs
+logs/
+*.log
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Editor configs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Testing
+coverage/
+*.test.js
+*.spec.js
+__tests__/
+
+# Docker artifacts
+docker-compose*.yml
+Dockerfile*
+.dockerignore
