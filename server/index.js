@@ -26,12 +26,21 @@ import billingRoutes from "./routes/billingRoutes.js";
 import invoiceRoutes from "./routes/invoiceRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import usageRoutes from "./routes/usageRoutes.js";
+import healthRoutes from "./routes/healthRoutes.js";
+import requestLogger from "./middleware/requestLogger.js";
+import { rateLimiter, nosqlSanitize, securityHeaders } from "./middleware/securityMiddleware.js";
+import errorHandler from "./middleware/errorHandler.js";
 import { startSyncScheduler } from "./services/syncScheduler.js";
 
 dotenv.config();
 connectDB();
 
 const app = express();
+
+app.use(requestLogger);
+app.use(securityHeaders);
+app.use(rateLimiter);
+app.use(nosqlSanitize);
 
 app.use(cors({
   origin: "http://localhost:5173",
@@ -65,6 +74,10 @@ app.use("/api/billing", billingRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/usage", usageRoutes);
+app.use("/api/health", healthRoutes);
+
+// centralized error handling middleware
+app.use(errorHandler);
 
 app.get("/", (req, res) => {
   res.send("QAPilot API Running 🚀");

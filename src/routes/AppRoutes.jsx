@@ -34,6 +34,7 @@ const Billing = lazy(() => import('../pages/Billing').then(module => ({ default:
 const Plans = lazy(() => import('../pages/Plans').then(module => ({ default: module.Plans })));
 const Invoices = lazy(() => import('../pages/Invoices').then(module => ({ default: module.Invoices })));
 const Usage = lazy(() => import('../pages/Usage').then(module => ({ default: module.Usage })));
+const SystemStatus = lazy(() => import('../pages/SystemStatus').then(module => ({ default: module.SystemStatus })));
 
 /** Premium placeholder screen shown for all Phase 3.2+ pages */
 function PlaceholderPage({ title, desc }) {
@@ -93,6 +94,7 @@ export function AppRoutes() {
         <Route path="/dashboard/plans" element={<Plans />} />
         <Route path="/dashboard/invoices" element={<Invoices />} />
         <Route path="/dashboard/usage" element={<Usage />} />
+        <Route path="/dashboard/system" element={<SystemStatus />} />
         <Route path="/dashboard/settings" element={<Settings />} />
       </Route>
 
