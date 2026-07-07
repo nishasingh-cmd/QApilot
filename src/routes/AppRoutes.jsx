@@ -24,6 +24,7 @@ const Activity = lazy(() => import('../pages/Activity').then(module => ({ defaul
 const Settings = lazy(() => import('../pages/Settings').then(module => ({ default: module.Settings })));
 const Jobs = lazy(() => import('../pages/Jobs').then(module => ({ default: module.Jobs })));
 const AssistantPage = lazy(() => import('../pages/AssistantPage').then(module => ({ default: module.AssistantPage })));
+const Deployments = lazy(() => import('../pages/Deployments').then(module => ({ default: module.Deployments })));
 
 /** Premium placeholder screen shown for all Phase 3.2+ pages */
 function PlaceholderPage({ title, desc }) {
@@ -73,6 +74,7 @@ export function AppRoutes() {
         <Route path="/dashboard/activity" element={<Activity />} />
         <Route path="/dashboard/jobs" element={<Jobs />} />
         <Route path="/dashboard/assistant" element={<AssistantPage />} />
+        <Route path="/dashboard/deployments" element={<Deployments />} />
         <Route path="/dashboard/settings" element={<Settings />} />
       </Route>
 
