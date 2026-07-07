@@ -9,6 +9,8 @@ import { syncUserRepositories } from "./repositorySyncEngine.js";
 import { createNotification } from "./notificationService.js";
 import { generateReportFromScan } from "./reportEngine.js";
 
+import { dispatchJob } from "./jobDispatcher.js";
+
 /**
  * Validates the HMAC X-Hub-Signature-256 header.
  */
@@ -114,9 +116,8 @@ export const processWebhook = async (githubEvent, deliveryId, payload) => {
       eventDoc.commitSha = commitSha;
       eventDoc.author = author;
 
-      // 5. Trigger Repository Synchronization
-      // Synchronizes branches renames metadata
-      await syncUserRepositories(userId);
+      // 5. Trigger Repository Synchronization via Job Dispatcher
+      await dispatchJob("repository", "sync-repositories", { userId, repositoryId: repo._id });
 
       // 6. Fetch Settings
       let settings = await RepositorySetting.findOne({ repositoryId: repo._id });
@@ -133,14 +134,17 @@ export const processWebhook = async (githubEvent, deliveryId, payload) => {
       );
 
       if (shouldScan) {
-        // Create notifications for Push or PR event received
+        // Enqueue notifications for Push or PR event received
         if (settings.enableNotifications) {
-          await createNotification(userId, {
-            type: "system_alert",
-            title: githubEvent === "push" ? "Push event received" : "Pull request opened",
-            message: `GitHub update event on '${repo.name}' (branch: ${branch}) by ${author}.`,
-            repository: repo.name,
-            severity: "info"
+          await dispatchJob("notification", "push-notification", {
+            userId,
+            notificationData: {
+              type: "system_alert",
+              title: githubEvent === "push" ? "Push event received" : "Pull request opened",
+              message: `GitHub update event on '${repo.name}' (branch: ${branch}) by ${author}.`,
+              repository: repo.name,
+              severity: "info"
+            }
           });
         }
 
@@ -155,61 +159,23 @@ export const processWebhook = async (githubEvent, deliveryId, payload) => {
         triggeredScan = scan._id;
 
         if (settings.enableNotifications) {
-          await createNotification(userId, {
-            type: "scan_started",
-            title: "Automatic scan started",
-            message: `Background scan initialized on repository '${repo.name}' (branch: ${branch}).`,
-            repository: repo.name,
-            severity: "info"
+          await dispatchJob("notification", "scan-started-notification", {
+            userId,
+            notificationData: {
+              type: "scan_started",
+              title: "Automatic scan started",
+              message: `Background scan initialized on repository '${repo.name}' (branch: ${branch}).`,
+              repository: repo.name,
+              severity: "info"
+            }
           });
         }
 
-        // Execute scan rule engines
-        const startTime = Date.now();
-        const result = await runScan(repo._id, scan._id, userId);
-        const elapsed = Math.round((Date.now() - startTime) / 1000) || 1;
-
-        scan.scores = result.scores;
-        scan.findings = result.findings;
-        scan.status = "success";
-        scan.elapsedTime = elapsed;
-        await scan.save();
-
-        if (settings.enableNotifications) {
-          await createNotification(userId, {
-            type: "scan_completed",
-            title: "Scan completed",
-            message: `GitHub webhook scan finished on '${repo.name}' with Quality index: ${result.scores.qualityScore}%.`,
-            repository: repo.name,
-            severity: "success"
-          });
-
-          // Trigger notifications for critical findings
-          const criticals = result.findings.filter(f => f.severity === "critical");
-          for (const f of criticals) {
-            await createNotification(userId, {
-              type: "critical_finding",
-              title: "Critical finding detected",
-              message: `Critical vulnerability '${f.title}' detected in '${repo.name}' (file: ${f.file.split('/').pop()}).`,
-              repository: repo.name,
-              severity: "critical"
-            });
-          }
-        }
-
-        // Generate reports if enabled
-        if (settings.generateReport) {
-          await generateReportFromScan(scan._id, userId);
-          if (settings.enableNotifications) {
-            await createNotification(userId, {
-              type: "scan_completed",
-              title: "AI report generated",
-              message: `Automated PDF reporting generated for scan execution.`,
-              repository: repo.name,
-              severity: "success"
-            });
-          }
-        }
+        // Enqueue Scan Job execution
+        await dispatchJob("scan", "run-scan", { repoId: repo._id, scanId: scan._id, userId });
+        
+        // Enqueue Analytics refresh job
+        await dispatchJob("analytics", "refresh-analytics", { userId });
       }
 
       // 7. Write RepositoryActivity Log

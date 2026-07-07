@@ -13,6 +13,7 @@ import findingRoutes from "./routes/findingRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
 import webhookRoutes from "./routes/webhookRoutes.js";
 import settingRoutes from "./routes/settingRoutes.js";
+import jobRoutes from "./routes/jobRoutes.js";
 import { startSyncScheduler } from "./services/syncScheduler.js";
 
 dotenv.config();
@@ -39,6 +40,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/findings", findingRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/webhooks", webhookRoutes);
+app.use("/api/jobs", jobRoutes);
 
 app.get("/", (req, res) => {
   res.send("QAPilot API Running 🚀");

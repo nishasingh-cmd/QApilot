@@ -15,7 +15,8 @@ import {
   ChevronLeft,
   ChevronRight,
   FileText,
-  Activity
+  Activity,
+  Cpu
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -30,6 +31,7 @@ const MENU_ITEMS = [
   { name: 'Team', icon: Users, path: '/dashboard/team' },
   { name: 'Notifications', icon: Bell, path: '/dashboard/notifications' },
   { name: 'Activity Log', icon: Activity, path: '/dashboard/activity' },
+  { name: 'Background Jobs', icon: Cpu, path: '/dashboard/jobs' },
   { name: 'Settings', icon: Settings, path: '/dashboard/settings' },
 ];
 

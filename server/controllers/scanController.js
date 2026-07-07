@@ -1,7 +1,6 @@
 import Scan from "../models/Scan.js";
 import Repository from "../models/Repository.js";
-import { runScan } from "../services/scanEngine.js";
-import { createNotification } from "../services/notificationService.js";
+import { dispatchJob } from "../services/jobDispatcher.js";
 
 // TRIGGER SCAN
 export const triggerScan = async (req, res) => {
@@ -23,75 +22,21 @@ export const triggerScan = async (req, res) => {
       elapsedTime: 0
     });
 
-    await createNotification(req.user._id, {
-      type: "scan_started",
-      title: "AI scan initiated",
-      message: `Automatic code analysis started on '${repo.name}' (branch: ${scan.branch}).`,
-      repository: repo.name,
-      severity: "info",
-      metadata: { scanId: scan._id }
-    });
+    // Enqueue Scan execution job
+    await dispatchJob("scan", "run-scan", { repoId, scanId: scan._id, userId: req.user._id });
 
-    // 2. Perform static analysis scan asynchronously to prevent route timeouts
-    // (Simulate brief calculation delay to match real world operations)
-    setTimeout(async () => {
-      const startTime = Date.now();
-      try {
-        const result = await runScan(repoId, scan._id, req.user._id);
-        const elapsedSeconds = Math.round((Date.now() - startTime) / 1000) || 1;
-
-        // Update Scan record
-        scan.scores = result.scores;
-        scan.findings = result.findings;
-        scan.status = "success";
-        scan.elapsedTime = elapsedSeconds;
-        await scan.save();
-
-        // Sync back to Repository's healthScore
-        repo.healthScore = result.scores.qualityScore;
-        await repo.save();
-
-        console.log(`Scan completed successfully for ${repo.name}. Quality Score: ${result.scores.qualityScore}% ✅`);
-
-        // Trigger scan completed notification
-        await createNotification(scan.userId, {
-          type: "scan_completed",
-          title: "AI scan completed",
-          message: `Code validation complete for '${repo.name}'. Overall score is ${result.scores.qualityScore}%.`,
-          repository: repo.name,
-          severity: "success",
-          metadata: { scanId: scan._id, score: result.scores.qualityScore }
-        });
-
-        // Trigger critical findings notifications
-        const criticalFindings = result.findings.filter((f) => f.severity === "critical");
-        if (criticalFindings.length > 0) {
-          for (const finding of criticalFindings) {
-            await createNotification(scan.userId, {
-              type: "critical_issue",
-              title: "Critical issue detected",
-              message: `${finding.message} exposed in ${repo.name}/${finding.file}.`,
-              repository: repo.name,
-              severity: "critical",
-              metadata: { scanId: scan._id, file: finding.file, message: finding.message }
-            });
-          }
-        }
-      } catch (scanErr) {
-        console.error(`Background scan failed for ${repo.name}:`, scanErr.message);
-        scan.status = "failed";
-        await scan.save();
-
-        await createNotification(scan.userId, {
-          type: "system_alert",
-          title: "AI Scan Failed",
-          message: `Code analysis failed for '${repo.name}' on branch '${scan.branch}'. Error: ${scanErr.message}`,
-          repository: repo.name,
-          severity: "critical",
-          metadata: { scanId: scan._id }
-        });
+    // Enqueue system alert notifications
+    await dispatchJob("notification", "scan-started-notification", {
+      userId: req.user._id,
+      notificationData: {
+        type: "scan_started",
+        title: "AI scan initiated",
+        message: `Automatic code analysis started on '${repo.name}' (branch: ${scan.branch}).`,
+        repository: repo.name,
+        severity: "info",
+        metadata: { scanId: scan._id }
       }
-    }, 2500);
+    });
 
     res.status(201).json(scan);
   } catch (error) {
