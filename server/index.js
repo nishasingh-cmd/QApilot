@@ -10,6 +10,7 @@ import scanRoutes from "./routes/scanRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import findingRoutes from "./routes/findingRoutes.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
 import { startSyncScheduler } from "./services/syncScheduler.js";
 
 dotenv.config();
@@ -33,6 +34,7 @@ app.use("/api/scan", scanRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/findings", findingRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 app.get("/", (req, res) => {
   res.send("QAPilot API Running 🚀");

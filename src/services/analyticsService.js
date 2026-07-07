@@ -1,82 +1,75 @@
-/**
- * Mock analytics service for QAPilot.
- * Resolves async mock Promises mimicking API traffic.
- */
+import axios from 'axios';
 
-import {
-  MOCK_OVERVIEW_METRICS,
-  MOCK_TRENDS_7D,
-  MOCK_TRENDS_30D,
-  MOCK_TRENDS_90D,
-  MOCK_TRENDS_12M,
-  MOCK_SEVERITY_DATA,
-  MOCK_CATEGORY_DATA,
-  MOCK_REPO_FINDINGS,
-  MOCK_TEAM_FINDINGS,
-  MOCK_REPO_HEALTH,
-  MOCK_AI_PERFORMANCE,
-  MOCK_TEAM_PRODUCTIVITY,
-  MOCK_EXECUTIVE_SUMMARY,
-} from '../data/analytics';
+const API_BASE = 'http://localhost:5000/api';
 
 export const analyticsService = {
-  getOverview: () =>
-    new Promise((resolve) =>
-      setTimeout(() => {
-        resolve({
-          metrics: { ...MOCK_OVERVIEW_METRICS },
-          summary: { ...MOCK_EXECUTIVE_SUMMARY },
-        });
-      }, 500)
-    ),
+  /**
+   * Fetches metrics and executive highlights summary from MERN backend.
+   */
+  getOverview: async () => {
+    const res = await axios.get(`${API_BASE}/analytics/overview`, { withCredentials: true });
+    return res.data;
+  },
 
-  getQualityTrends: (timeframe) =>
-    new Promise((resolve) =>
-      setTimeout(() => {
-        let trends = MOCK_TRENDS_30D;
-        if (timeframe === '7d') trends = MOCK_TRENDS_7D;
-        else if (timeframe === '90d') trends = MOCK_TRENDS_90D;
-        else if (timeframe === '12m') trends = MOCK_TRENDS_12M;
+  /**
+   * Fetches historical health trends based on selected timeframe filter.
+   */
+  getQualityTrends: async (timeframe) => {
+    const res = await axios.get(`${API_BASE}/analytics/trends`, {
+      params: { timeframe },
+      withCredentials: true
+    });
+    return res.data || [];
+  },
 
-        resolve([...trends]);
-      }, 600)
-    ),
+  /**
+   * Fetches list of repositories and health metrics.
+   */
+  getRepositoryHealth: async () => {
+    const res = await axios.get(`${API_BASE}/analytics/repositories`, { withCredentials: true });
+    return res.data || [];
+  },
 
-  getRepositoryHealth: () =>
-    new Promise((resolve) =>
-      setTimeout(() => {
-        resolve([...MOCK_REPO_HEALTH]);
-      }, 400)
-    ),
+  /**
+   * Fetches developer productivity rankings leaderboard.
+   */
+  getTeamMetrics: async () => {
+    const res = await axios.get(`${API_BASE}/analytics/team`, { withCredentials: true });
+    return res.data;
+  },
 
-  getTeamMetrics: () =>
-    new Promise((resolve) =>
-      setTimeout(() => {
-        resolve({
-          productivity: [...MOCK_TEAM_PRODUCTIVITY],
-          findings: [...MOCK_TEAM_FINDINGS],
-        });
-      }, 500)
-    ),
+  /**
+   * Fetches AI accuracy metrics, severity distributions, and categories.
+   */
+  getAIAnalytics: async () => {
+    const res = await axios.get(`${API_BASE}/analytics/ai`, { withCredentials: true });
+    return res.data;
+  },
 
-  getAIAnalytics: () =>
-    new Promise((resolve) =>
-      setTimeout(() => {
-        resolve({
-          performance: { ...MOCK_AI_PERFORMANCE },
-          severity: [...MOCK_SEVERITY_DATA],
-          category: [...MOCK_CATEGORY_DATA],
-          repoDistribution: [...MOCK_REPO_FINDINGS],
-        });
-      }, 500)
-    ),
+  /**
+   * Downloads exported dashboard analytics report file.
+   */
+  exportAnalytics: async (format) => {
+    const res = await axios.get(`${API_BASE}/analytics/export`, {
+      params: { format },
+      responseType: 'blob',
+      withCredentials: true
+    });
 
-  exportAnalytics: (format) =>
-    new Promise((resolve) =>
-      setTimeout(() => {
-        resolve({ success: true, format, timestamp: new Date().toISOString() });
-      }, 800)
-    ),
+    const mime = format === 'json' ? 'application/json' : 'text/csv';
+    const blob = new Blob([res.data], { type: mime });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.setAttribute('download', `analytics-dashboard-export-${Date.now()}.${format}`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+
+    return { success: true };
+  }
 };
 
 export default analyticsService;

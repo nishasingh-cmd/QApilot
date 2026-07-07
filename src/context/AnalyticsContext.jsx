@@ -1,9 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { analyticsService } from '../services/analyticsService';
+import { useScans } from './ScanContext';
+import { useFindings } from './FindingsContext';
 
 const AnalyticsContext = createContext(null);
 
 export function AnalyticsProvider({ children }) {
+  const { history: scanHistory } = useScans();
+  const { findings } = useFindings();
+
   const [timeframe, setTimeframe] = useState('30d');
   const [overview, setOverview] = useState(null);
   const [qualityTrends, setQualityTrends] = useState([]);
@@ -16,6 +21,9 @@ export function AnalyticsProvider({ children }) {
 
   const [exportOpen, setExportOpen] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const refreshAnalytics = () => setRefreshTrigger((prev) => prev + 1);
 
   // Load everything
   useEffect(() => {
@@ -42,7 +50,7 @@ export function AnalyticsProvider({ children }) {
       }
     };
     loadAll();
-  }, [timeframe]);
+  }, [timeframe, refreshTrigger, scanHistory, findings]);
 
   const triggerExport = async (format) => {
     setExportLoading(true);
@@ -72,6 +80,7 @@ export function AnalyticsProvider({ children }) {
         setExportOpen,
         exportLoading,
         triggerExport,
+        refreshAnalytics,
       }}
     >
       {children}
