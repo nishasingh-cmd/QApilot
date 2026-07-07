@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, SlidersHorizontal, RotateCcw, ChevronDown } from 'lucide-react';
+import axios from 'axios';
 
-const REPOS = ['all', 'qapilot-web', 'dashboard-ui', 'mobile-app', 'backend-api', 'design-system', 'analytics-engine'];
 const SEVERITIES = ['all', 'critical', 'high', 'medium', 'low', 'info'];
 const CATEGORIES = ['all', 'security', 'performance', 'accessibility', 'testing', 'code-quality', 'best-practices', 'maintainability'];
 const STATUSES = ['all', 'open', 'investigating', 'in-progress', 'resolved', 'ignored'];
@@ -46,6 +46,21 @@ export function FindingsFilters({
   onReset,
   totalVisible,
 }) {
+  const [REPOS, setREPOS] = useState(['all']);
+
+  useEffect(() => {
+    const fetchRepos = async () => {
+      try {
+        const res = await axios.get('http://localhost:5000/api/repositories', { withCredentials: true });
+        if (res.data && res.data.length > 0) {
+          setREPOS(['all', ...res.data.map((r) => r.name)]);
+        }
+      } catch (err) {
+        console.warn("Failed to retrieve live repos for findings filter", err.message);
+      }
+    };
+    fetchRepos();
+  }, []);
   return (
     <div className="space-y-3 mb-5">
       {/* Search + Sort row */}

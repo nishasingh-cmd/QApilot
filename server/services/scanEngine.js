@@ -1,5 +1,6 @@
 import { runRules } from "./ruleEngine.js";
 import Repository from "../models/Repository.js";
+import { generateFindings } from "./findingGenerator.js";
 
 /**
  * Generates a mock file tree matching repository configuration to execute static rules on.
@@ -52,7 +53,7 @@ const generateMockFileTree = (repo) => {
 /**
  * Scan Engine entry point.
  */
-export const runScan = async (repoId) => {
+export const runScan = async (repoId, scanId, userId) => {
   const repo = await Repository.findById(repoId);
   if (!repo) {
     throw new Error("Repository not found in database");
@@ -90,6 +91,20 @@ export const runScan = async (repoId) => {
   const performanceScore = Math.max(30, Math.min(100, 100 - performanceDeduction));
   const maintainabilityScore = Math.max(30, Math.min(100, 100 - maintainabilityDeduction));
 
+  // 4. Generate persistent finding documents in MongoDB
+  let savedDocs = [];
+  if (scanId && userId) {
+    savedDocs = await generateFindings(findings, repoId, scanId, userId);
+  }
+
+  // 5. Compile findings counts summary
+  const summary = {
+    critical: savedDocs.filter(f => f.severity === "critical").length,
+    high: savedDocs.filter(f => f.severity === "high").length,
+    medium: savedDocs.filter(f => f.severity === "medium").length,
+    low: savedDocs.filter(f => f.severity === "low").length
+  };
+
   return {
     scores: {
       qualityScore,
@@ -97,7 +112,8 @@ export const runScan = async (repoId) => {
       performanceScore,
       maintainabilityScore
     },
-    findings
+    findings: savedDocs,
+    findingsSummary: summary
   };
 };
 

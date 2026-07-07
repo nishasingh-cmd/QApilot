@@ -2,6 +2,7 @@ import Scan from "../models/Scan.js";
 import Repository from "../models/Repository.js";
 import User from "../models/User.js";
 import Report from "../models/Report.js";
+import Finding from "../models/Finding.js";
 import { generateAiSummary } from "./aiSummaryService.js";
 
 /**
@@ -24,22 +25,27 @@ export const generateReportFromScan = async (scanId, userId) => {
   const user = await User.findById(userId);
   const userName = user ? user.name : "System Auditor";
 
-  // 4. Calculate findings counters
-  const critical = scan.findings.filter((f) => f.severity === "critical").length;
-  const warning = scan.findings.filter((f) => f.severity === "warning" || f.severity === "high").length;
-  const info = scan.findings.filter((f) => f.severity === "info" || f.severity === "low").length;
+  // 4. Query findings from database
+  const databaseFindings = await Finding.find({ scanId }).lean();
+
+  const critical = databaseFindings.filter((f) => f.severity === "critical").length;
+  const high = databaseFindings.filter((f) => f.severity === "high").length;
+  const medium = databaseFindings.filter((f) => f.severity === "medium").length;
+  const low = databaseFindings.filter((f) => f.severity === "low").length;
+  const info = databaseFindings.filter((f) => f.severity === "info").length;
 
   const findingsSummary = {
     critical,
-    high: 0, // Rule engine produces warning/critical/info
-    medium: warning,
-    low: info,
-    resolved: 0,
-    ignored: 0
+    high,
+    medium,
+    low: low + info,
+    resolved: databaseFindings.filter((f) => f.status === "resolved").length,
+    ignored: databaseFindings.filter((f) => f.status === "ignored").length
   };
 
   // 5. Generate rule-based summaries and lists
-  const aiAnalysis = generateAiSummary(scan, repo);
+  const scanWithDbFindings = { ...scan.toObject(), findings: databaseFindings };
+  const aiAnalysis = generateAiSummary(scanWithDbFindings, repo);
 
   // 6. Build category scores
   const categoryScores = {

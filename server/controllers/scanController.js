@@ -37,7 +37,7 @@ export const triggerScan = async (req, res) => {
     setTimeout(async () => {
       const startTime = Date.now();
       try {
-        const result = await runScan(repoId);
+        const result = await runScan(repoId, scan._id, req.user._id);
         const elapsedSeconds = Math.round((Date.now() - startTime) / 1000) || 1;
 
         // Update Scan record

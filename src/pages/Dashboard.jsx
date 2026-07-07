@@ -13,7 +13,12 @@ export function Dashboard() {
     totalRepositories: 8,
     activeRepositories: 12,
     healthScoreAverage: 92,
-    recentlyUpdated: []
+    recentlyUpdated: [],
+    openFindings: 0,
+    criticalFindings: 0,
+    resolvedFindings: 0,
+    repositoriesWithIssues: 0,
+    averageSeverity: '0.0'
   });
   const [mode, setMode] = useState('simulator'); // 'live' or 'simulator'
 
@@ -45,20 +50,52 @@ export function Dashboard() {
       icon: GitFork,
     },
     {
-      title: 'Active AI Scans',
-      value: String(stats.activeRepositories),
-      description: 'Scans run automatically on push/PR events.',
-      trend: 'Continuous',
-      trendType: 'up',
-      icon: Zap,
-    },
-    {
       title: 'Quality Health Score',
       value: `${stats.healthScoreAverage}%`,
       description: 'Average repository code health index metric.',
       trend: mode === 'live' ? 'Live aggregate' : '-1.5%',
       trendType: 'up',
       icon: ShieldAlert,
+    },
+    {
+      title: 'Open Findings',
+      value: String(stats.openFindings || 0),
+      description: 'Active unresolved code quality alerts.',
+      trend: 'Live MongoDB',
+      trendType: 'down',
+      icon: Zap,
+    },
+    {
+      title: 'Critical Findings',
+      value: String(stats.criticalFindings || 0),
+      description: 'High-severity vulnerability flags.',
+      trend: 'Action needed',
+      trendType: 'down',
+      icon: ShieldAlert,
+    },
+    {
+      title: 'Resolved Findings',
+      value: String(stats.resolvedFindings || 0),
+      description: 'Findings marked fixed or resolved.',
+      trend: 'Completed audits',
+      trendType: 'up',
+      icon: CloudLightning,
+    },
+    {
+      title: 'Repos with Issues',
+      value: String(stats.repositoriesWithIssues || 0),
+      description: 'Repositories containing open issues.',
+      trend: 'Total impacted',
+      trendType: 'down',
+      icon: GitFork,
+    },
+    {
+      title: 'Average Severity',
+      value: String(stats.averageSeverity || '0.0'),
+      description: 'Mean risk rating of outstanding issues.',
+      trend: 'Max 5.0 scale',
+      trendType: 'up',
+      icon: Zap,
     },
     {
       title: 'Deployment Success',

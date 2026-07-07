@@ -1,6 +1,7 @@
 import express from "express";
 import { protect } from "../middleware/authMiddleware.js";
 import Repository from "../models/Repository.js";
+import Finding from "../models/Finding.js";
 import { getUserRepositories } from "../services/repositoryService.js";
 import { syncUserRepositories } from "../services/repositorySyncEngine.js";
 import { computeRepoMetrics } from "../services/repoMetricsService.js";
@@ -42,11 +43,34 @@ router.get("/overview", protect, async (req, res) => {
         updatedAt: r.updatedAt || r.lastSyncedAt
       }));
 
+    // Dynamic metrics from Finding database model
+    const openFindings = await Finding.countDocuments({ userId: req.user._id, status: "open" });
+    const criticalFindings = await Finding.countDocuments({ userId: req.user._id, status: "open", severity: "critical" });
+    const resolvedFindings = await Finding.countDocuments({ userId: req.user._id, status: "resolved" });
+
+    const reposWithIssues = await Finding.distinct("repositoryId", { userId: req.user._id, status: "open" });
+    const repositoriesWithIssues = reposWithIssues.length;
+
+    const openFindingsDocs = await Finding.find({ userId: req.user._id, status: "open" }, { severity: 1 }).lean();
+    let severitySum = 0;
+    const sevMap = { critical: 5, high: 4, medium: 3, low: 2, info: 1 };
+    openFindingsDocs.forEach((f) => {
+      severitySum += (sevMap[f.severity] || 3);
+    });
+    const averageSeverity = openFindingsDocs.length > 0 
+      ? (severitySum / openFindingsDocs.length).toFixed(1) 
+      : "0.0";
+
     res.json({
       totalRepositories,
       activeRepositories,
       healthScoreAverage,
-      recentlyUpdated
+      recentlyUpdated,
+      openFindings,
+      criticalFindings,
+      resolvedFindings,
+      repositoriesWithIssues,
+      averageSeverity
     });
   } catch (err) {
     res.status(500).json({ message: err.message });

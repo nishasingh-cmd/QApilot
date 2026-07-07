@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { findingService } from '../services/findingService';
-import { MOCK_FINDINGS_METRICS } from '../data/findings';
 
 const FindingsContext = createContext(null);
 
@@ -10,12 +9,23 @@ export function FindingsProvider({ children }) {
   const [error, setError] = useState(null);
 
   // Dynamic metrics calculation
+  const resolvedFindings = findings.filter((f) => f.status === 'resolved' && f.resolvedAt);
+  let computedAvgResolutionTime = '4.2 days';
+  if (resolvedFindings.length > 0) {
+    const totalDiff = resolvedFindings.reduce((sum, f) => {
+      const diff = new Date(f.resolvedAt).getTime() - new Date(f.createdAt).getTime();
+      return sum + diff;
+    }, 0);
+    const avgDays = (totalDiff / resolvedFindings.length / 86400000).toFixed(1);
+    computedAvgResolutionTime = `${avgDays} days`;
+  }
+
   const metrics = {
     total: findings.length,
     critical: findings.filter((f) => f.severity === 'critical' && f.status === 'open').length,
     high: findings.filter((f) => f.severity === 'high' && f.status === 'open').length,
     resolved: findings.filter((f) => f.status === 'resolved').length,
-    avgResolutionTime: '4.2 days',
+    avgResolutionTime: computedAvgResolutionTime,
     reposImpacted: new Set(findings.map((f) => f.repo)).size,
   };
 
@@ -82,19 +92,17 @@ export function FindingsProvider({ children }) {
   const clearSelection = () => setSelectedIds([]);
 
   const bulkResolve = async () => {
-    for (const id of selectedIds) {
-      await findingService.resolveFinding(id);
-    }
+    if (selectedIds.length === 0) return;
+    await findingService.bulkActions(selectedIds, 'resolve');
     setFindings((prev) =>
-      prev.map((f) => (selectedIds.includes(f.id) ? { ...f, status: 'resolved' } : f))
+      prev.map((f) => (selectedIds.includes(f.id) ? { ...f, status: 'resolved', resolvedAt: new Date().toISOString() } : f))
     );
     clearSelection();
   };
 
   const bulkIgnore = async () => {
-    for (const id of selectedIds) {
-      await findingService.ignoreFinding(id);
-    }
+    if (selectedIds.length === 0) return;
+    await findingService.bulkActions(selectedIds, 'ignore');
     setFindings((prev) =>
       prev.map((f) => (selectedIds.includes(f.id) ? { ...f, status: 'ignored' } : f))
     );
@@ -102,9 +110,8 @@ export function FindingsProvider({ children }) {
   };
 
   const bulkAssign = async (assignee) => {
-    for (const id of selectedIds) {
-      await findingService.assignFinding(id, assignee);
-    }
+    if (selectedIds.length === 0) return;
+    await findingService.bulkActions(selectedIds, 'assign', assignee);
     setFindings((prev) =>
       prev.map((f) => (selectedIds.includes(f.id) ? { ...f, assignee } : f))
     );
@@ -114,10 +121,10 @@ export function FindingsProvider({ children }) {
   const resolveOne = async (id) => {
     await findingService.resolveFinding(id);
     setFindings((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, status: 'resolved' } : f))
+      prev.map((f) => (f.id === id ? { ...f, status: 'resolved', resolvedAt: new Date().toISOString() } : f))
     );
     if (selectedFinding?.id === id) {
-      setSelectedFinding((prev) => ({ ...prev, status: 'resolved' }));
+      setSelectedFinding((prev) => ({ ...prev, status: 'resolved', resolvedAt: new Date().toISOString() }));
     }
   };
 
@@ -126,6 +133,9 @@ export function FindingsProvider({ children }) {
     setFindings((prev) =>
       prev.map((f) => (f.id === id ? { ...f, status: 'ignored' } : f))
     );
+    if (selectedFinding?.id === id) {
+      setSelectedFinding((prev) => ({ ...prev, status: 'ignored' }));
+    }
   };
 
   const triggerExport = async (format) => {
