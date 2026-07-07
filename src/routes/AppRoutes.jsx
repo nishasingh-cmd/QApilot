@@ -20,6 +20,8 @@ const Findings = lazy(() => import('../pages/Findings').then(module => ({ defaul
 const Analytics = lazy(() => import('../pages/Analytics').then(module => ({ default: module.Analytics })));
 const Reports = lazy(() => import('../pages/Reports').then(module => ({ default: module.Reports })));
 const Notifications = lazy(() => import('../pages/Notifications').then(module => ({ default: module.Notifications })));
+const Activity = lazy(() => import('../pages/Activity').then(module => ({ default: module.Activity })));
+const Settings = lazy(() => import('../pages/Settings').then(module => ({ default: module.Settings })));
 
 /** Premium placeholder screen shown for all Phase 3.2+ pages */
 function PlaceholderPage({ title, desc }) {
@@ -66,7 +68,8 @@ export function AppRoutes() {
         <Route path="/dashboard/analytics" element={<Analytics />} />
         <Route path="/dashboard/team" element={<PlaceholderPage title="Team" desc="Manage workspace members, roles, and permissions." />} />
         <Route path="/dashboard/notifications" element={<Notifications />} />
-        <Route path="/dashboard/settings" element={<PlaceholderPage title="Settings" desc="Configure integrations, tokens, webhooks, billing, and account preferences." />} />
+        <Route path="/dashboard/activity" element={<Activity />} />
+        <Route path="/dashboard/settings" element={<Settings />} />
       </Route>
 
       {/* Catch-all 404 Route */}

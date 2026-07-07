@@ -20,7 +20,10 @@ const repositorySchema = new mongoose.Schema(
       type: Number,
       default: 0
     },
-
+    archived: {
+      type: Boolean,
+      default: false
+    },
     lastSyncedAt: Date,
 
     userId: {

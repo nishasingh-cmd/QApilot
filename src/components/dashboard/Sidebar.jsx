@@ -14,7 +14,8 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  FileText
+  FileText,
+  Activity
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -28,6 +29,7 @@ const MENU_ITEMS = [
   { name: 'Analytics', icon: TrendingUp, path: '/dashboard/analytics' },
   { name: 'Team', icon: Users, path: '/dashboard/team' },
   { name: 'Notifications', icon: Bell, path: '/dashboard/notifications' },
+  { name: 'Activity Log', icon: Activity, path: '/dashboard/activity' },
   { name: 'Settings', icon: Settings, path: '/dashboard/settings' },
 ];
 

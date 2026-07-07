@@ -36,6 +36,7 @@ export const syncUserRepositories = async (userId) => {
       existing.description = live.description;
       existing.language = live.language;
       existing.defaultBranch = live.default_branch;
+      existing.archived = live.archived || false;
       existing.owner = {
         login: live.owner.login,
         avatarUrl: live.owner.avatar_url
@@ -54,6 +55,7 @@ export const syncUserRepositories = async (userId) => {
         description: live.description,
         language: live.language,
         defaultBranch: live.default_branch,
+        archived: live.archived || false,
         owner: {
           login: live.owner.login,
           avatarUrl: live.owner.avatar_url

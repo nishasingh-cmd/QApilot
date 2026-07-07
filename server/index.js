@@ -11,6 +11,8 @@ import reportRoutes from "./routes/reportRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import findingRoutes from "./routes/findingRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
+import webhookRoutes from "./routes/webhookRoutes.js";
+import settingRoutes from "./routes/settingRoutes.js";
 import { startSyncScheduler } from "./services/syncScheduler.js";
 
 dotenv.config();
@@ -30,11 +32,13 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/github", githubRoutes);
 app.use("/api/repositories", repositoryRoutes);
+app.use("/api/repositories", settingRoutes);
 app.use("/api/scan", scanRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/findings", findingRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/webhooks", webhookRoutes);
 
 app.get("/", (req, res) => {
   res.send("QAPilot API Running 🚀");
