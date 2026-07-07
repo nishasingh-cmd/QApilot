@@ -3,6 +3,7 @@ import Scan from "../models/Scan.js";
 import Repository from "../models/Repository.js";
 import { generateReportFromScan } from "../services/reportEngine.js";
 import { exportToJson, exportToPdfReady, exportToCsv } from "../services/exportService.js";
+import { createNotification } from "../services/notificationService.js";
 
 // Helper to format report response for both frontend UI needs and prompt format guidelines
 const formatReportResponse = (r) => {
@@ -97,6 +98,16 @@ export const generateReport = async (req, res) => {
     }
 
     const report = await generateReportFromScan(scanId, req.user._id);
+
+    await createNotification(req.user._id, {
+      type: "report_ready",
+      title: "Quality report ready",
+      message: `Executive quality audit report generated for '${report.repo}' (version ${report.version}).`,
+      repository: report.repo,
+      severity: "success",
+      metadata: { reportId: report._id }
+    });
+
     res.status(201).json(formatReportResponse(report));
   } catch (error) {
     res.status(500).json({ message: error.message });

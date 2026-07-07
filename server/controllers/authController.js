@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import { createNotification } from "../services/notificationService.js";
 
 // generate token
 const generateToken = (id) => {
@@ -25,6 +26,13 @@ export const registerUser = async (req, res) => {
       name,
       email,
       password: hashedPassword
+    });
+
+    await createNotification(user._id, {
+      type: "auth_register",
+      title: "Registration Successful",
+      message: `Welcome to QAPilot, ${user.name}! Your account has been registered successfully.`,
+      severity: "success"
     });
 
     const token = generateToken(user._id);
@@ -62,6 +70,13 @@ export const loginUser = async (req, res) => {
     }
 
     const token = generateToken(user._id);
+
+    await createNotification(user._id, {
+      type: "system_alert",
+      title: "Login Detected",
+      message: "You successfully authenticated and logged into your QAPilot dashboard.",
+      severity: "info"
+    });
 
     res.cookie("token", token, {
       httpOnly: true,

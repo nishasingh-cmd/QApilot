@@ -56,7 +56,7 @@ export function NotificationsProvider({ children }) {
       addToast(event.title, toastType, event.description);
     };
 
-    const stopStream = notificationService.startNotificationStream(handleNewEvent, 8000);
+    const stopStream = notificationService.startNotificationStream(handleNewEvent, 15000);
     return () => stopStream();
   }, [addToast]);
 

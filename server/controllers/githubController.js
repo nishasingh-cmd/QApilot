@@ -2,6 +2,7 @@ import { getGitHubToken, getGitHubUserRepos } from "../services/githubService.js
 import { saveRepositories } from "../services/repositoryService.js";
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
+import { createNotification } from "../services/notificationService.js";
 
 export const githubCallback = async (req, res) => {
   try {
@@ -28,6 +29,13 @@ export const githubCallback = async (req, res) => {
 
     // SAVE INTO DB
     const savedRepos = await saveRepositories(repos, user._id);
+
+    await createNotification(user._id, {
+      type: "repo_connected",
+      title: "New repository connected",
+      message: `GitHub integration connected and synchronized codebase indices.`,
+      severity: "success"
+    });
 
     res.json({
       message: "GitHub connected & repositories synced",

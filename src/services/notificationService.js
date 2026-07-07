@@ -1,148 +1,90 @@
-/**
- * Notification service simulating real-time system event updates.
- * Exposes methods to handle read statuses, clearing feeds, and scheduling alerts.
- */
+import axios from 'axios';
 
-const REPOS = ['qapilot-web', 'dashboard-ui', 'mobile-app', 'backend-api', 'design-system', 'analytics-engine'];
-const DEVELOPERS = ['Nisha Singh', 'Alex Chen', 'Maria Lopez', 'Tom Wright', 'Priya Patel'];
+const API_BASE = 'http://localhost:5000/api';
 
-const EVENT_TEMPLATES = [
-  {
-    type: 'scan_started',
-    title: 'AI scan initiated',
-    desc: (repo) => `Automatic code analysis started on ${repo} (branch: main).`,
-  },
-  {
-    type: 'scan_completed',
-    title: 'AI scan completed',
-    desc: (repo) => `Code validation complete for ${repo}. Overall score is 92%.`,
-  },
-  {
-    type: 'critical_issue',
-    title: 'Critical issue detected',
-    desc: (repo) => `Hardcoded API secret token exposed in ${repo}/src/services/api.js.`,
-    severity: 'critical',
-  },
-  {
-    type: 'repo_connected',
-    title: 'New repository connected',
-    desc: (repo) => `GitHub integration synchronized codebase index for ${repo}.`,
-  },
-  {
-    type: 'ai_insight',
-    title: 'AI Insight generated',
-    desc: (repo) => `Potential memory leak path detected in useEffect lifecycle on ${repo}.`,
-    severity: 'high',
-  },
-  {
-    type: 'report_ready',
-    title: 'Quality report ready',
-    desc: (repo) => `Executive quality audit report generated for ${repo} (version v1.2).`,
-  },
-  {
-    type: 'system_alert',
-    title: 'GitHub synchronization complete',
-    desc: (repo) => `Successfully parsed webhook event data from GitHub hook.`,
-  },
-  {
-    type: 'deployment_event',
-    title: 'CI/CD deployment validation',
-    desc: (repo) => `Pipeline metrics match validation rules. Auto-deployed staging environment.`,
-    severity: 'info',
-  },
-];
-
-let idCounter = 1;
-let currentNotifications = [
-  {
-    id: `not-${String(idCounter++).padStart(3, '0')}`,
-    type: 'repo_connected',
-    title: 'New repository connected',
-    description: 'GitHub integration synchronized codebase index for design-system.',
-    timestamp: '2 hours ago',
-    repo: 'design-system',
-    read: false,
-  },
-  {
-    id: `not-${String(idCounter++).padStart(3, '0')}`,
-    type: 'critical_issue',
-    title: 'Critical issue detected',
-    description: 'Hardcoded API secret token exposed in qapilot-web/src/services/api.js.',
-    timestamp: '4 hours ago',
-    repo: 'qapilot-web',
-    severity: 'critical',
-    read: false,
-  },
-  {
-    id: `not-${String(idCounter++).padStart(3, '0')}`,
-    type: 'scan_completed',
-    title: 'AI scan completed',
-    description: 'Code validation complete for backend-api. Overall score is 95%.',
-    timestamp: '1 day ago',
-    repo: 'backend-api',
-    read: true,
-  },
-  {
-    id: `not-${String(idCounter++).padStart(3, '0')}`,
-    type: 'report_ready',
-    title: 'Quality report ready',
-    description: 'Executive quality audit report generated for mobile-app (version v1.0).',
-    timestamp: '2 days ago',
-    repo: 'mobile-app',
-    read: true,
-  },
-];
+// Keeps track of notification IDs that we've already flagged as "seen" to prevent duplicate toast alerts
+let seenNotificationIds = new Set();
+let isFirstFetch = true;
 
 export const notificationService = {
-  getNotifications: () =>
-    new Promise((resolve) => setTimeout(() => resolve([...currentNotifications]), 300)),
+  /**
+   * Fetches all notifications for the authenticated user.
+   */
+  getNotifications: async () => {
+    const res = await axios.get(`${API_BASE}/notifications`, { withCredentials: true });
+    
+    // Automatically populate seen ids set on loading notifications
+    if (res.data) {
+      res.data.forEach((n) => {
+        seenNotificationIds.add(n.id);
+      });
+      isFirstFetch = false;
+    }
+    
+    return res.data || [];
+  },
 
-  generateRandomEvent: () => {
-    const template = EVENT_TEMPLATES[Math.floor(Math.random() * EVENT_TEMPLATES.length)];
-    const repo = REPOS[Math.floor(Math.random() * REPOS.length)];
+  /**
+   * Marks a notification as read.
+   */
+  markAsRead: async (id) => {
+    const res = await axios.patch(`${API_BASE}/notifications/${id}/read`, {}, { withCredentials: true });
+    return res.data;
+  },
 
-    return {
-      id: `not-${String(idCounter++).padStart(3, '0')}`,
-      type: template.type,
-      title: template.title,
-      description: template.desc(repo),
-      timestamp: 'Just now',
-      repo,
-      severity: template.severity,
-      read: false,
+  /**
+   * Marks all notifications as read.
+   */
+  markAllAsRead: async () => {
+    const res = await axios.patch(`${API_BASE}/notifications/read-all`, {}, { withCredentials: true });
+    return res.data;
+  },
+
+  /**
+   * Clears/deletes all notifications.
+   */
+  clearNotifications: async () => {
+    const res = await axios.delete(`${API_BASE}/notifications`, { withCredentials: true });
+    return res.data;
+  },
+
+  /**
+   * Polls the backend every `intervalMs` (default 15 seconds) to fetch new notifications,
+   * triggering the callback for any fresh items.
+   */
+  startNotificationStream: (callback, intervalMs = 15000) => {
+    const poll = async () => {
+      try {
+        const res = await axios.get(`${API_BASE}/notifications`, { withCredentials: true });
+        const list = res.data || [];
+
+        if (isFirstFetch) {
+          // On first run, seed seen notification list so we don't trigger a screen-full of alerts
+          list.forEach((n) => seenNotificationIds.add(n.id));
+          isFirstFetch = false;
+          return;
+        }
+
+        // Loop through fetched notifications from oldest to newest to trigger alerts in order
+        const reversedList = [...list].reverse();
+        reversedList.forEach((n) => {
+          if (!seenNotificationIds.has(n.id)) {
+            seenNotificationIds.add(n.id);
+            // Trigger toast alert callback in UI
+            callback(n);
+          }
+        });
+      } catch (err) {
+        console.warn('Notification polling stream check failed:', err.message);
+      }
     };
-  },
 
-  markAsRead: (id) =>
-    new Promise((resolve) => {
-      currentNotifications = currentNotifications.map((n) =>
-        n.id === id ? { ...n, read: true } : n
-      );
-      resolve({ success: true, id });
-    }),
+    // Execute first poll quickly after delay
+    setTimeout(poll, 1500);
 
-  markAllAsRead: () =>
-    new Promise((resolve) => {
-      currentNotifications = currentNotifications.map((n) => ({ ...n, read: true }));
-      resolve({ success: true });
-    }),
-
-  clearNotifications: () =>
-    new Promise((resolve) => {
-      currentNotifications = [];
-      resolve({ success: true });
-    }),
-
-  startNotificationStream: (callback, intervalMs = 9000) => {
-    const timer = setInterval(() => {
-      const newEvent = notificationService.generateRandomEvent();
-      // Side effect: prepend to current list so subsequent getNotifications sees it
-      currentNotifications = [newEvent, ...currentNotifications];
-      callback(newEvent);
-    }, intervalMs);
-
+    const timer = setInterval(poll, intervalMs);
     return () => clearInterval(timer);
-  },
+  }
 };
 
 export default notificationService;

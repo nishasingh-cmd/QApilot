@@ -1,6 +1,7 @@
 import { getGitHubUserRepos } from "./githubService.js";
 import Repository from "../models/Repository.js";
 import User from "../models/User.js";
+import { createNotification } from "./notificationService.js";
 
 /**
  * Sync engine to fetch latest GitHub repos, compare against DB, and perform an intelligent merge.
@@ -66,11 +67,27 @@ export const syncUserRepositories = async (userId) => {
   }
 
   // 4. Detect deleted repos (present in DB, but not in GitHub anymore)
+  let deletedCount = 0;
   for (const dbRepo of dbRepos) {
     if (!processedGithubIds.has(dbRepo.githubId)) {
       await Repository.deleteOne({ _id: dbRepo._id });
+      deletedCount++;
+      await createNotification(userId, {
+        type: "repo_connected",
+        title: "Repository Disconnected",
+        message: `Repository '${dbRepo.name}' was disconnected and removed from your QAPilot workspace.`,
+        repository: dbRepo.name,
+        severity: "warning"
+      });
     }
   }
+
+  await createNotification(userId, {
+    type: "system_alert",
+    title: "Repository Sync Finished",
+    message: `Intelligent merge finished synchronizing ${syncedRepos.length} repository configurations (removed ${deletedCount} deleted repos).`,
+    severity: "success"
+  });
 
   return syncedRepos;
 };
