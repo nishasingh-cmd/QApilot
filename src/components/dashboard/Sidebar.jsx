@@ -18,7 +18,9 @@ import {
   Activity,
   Cpu,
   Bot,
-  Rocket
+  Rocket,
+  Building2,
+  Shield
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -30,7 +32,9 @@ const MENU_ITEMS = [
   { name: 'AI Reports', icon: FileText, path: '/dashboard/reports' },
   { name: 'Test Runs', icon: Terminal, path: '/dashboard/runs' },
   { name: 'Analytics', icon: TrendingUp, path: '/dashboard/analytics' },
-  { name: 'Team', icon: Users, path: '/dashboard/team' },
+  { name: 'Team', icon: Users, path: '/dashboard/members' },
+  { name: 'Organizations', icon: Building2, path: '/dashboard/organizations' },
+  { name: 'Audit Logs', icon: Shield, path: '/dashboard/audit' },
   { name: 'Notifications', icon: Bell, path: '/dashboard/notifications' },
   { name: 'Activity Log', icon: Activity, path: '/dashboard/activity' },
   { name: 'Background Jobs', icon: Cpu, path: '/dashboard/jobs' },

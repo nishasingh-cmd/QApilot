@@ -17,6 +17,11 @@ import jobRoutes from "./routes/jobRoutes.js";
 import assistantRoutes from "./routes/assistantRoutes.js";
 import deploymentRoutes from "./routes/deploymentRoutes.js";
 import pipelineRoutes from "./routes/pipelineRoutes.js";
+import organizationRoutes from "./routes/organizationRoutes.js";
+import workspaceRoutes from "./routes/workspaceRoutes.js";
+import memberRoutes from "./routes/memberRoutes.js";
+import invitationRoutes from "./routes/invitationRoutes.js";
+import auditRoutes from "./routes/auditRoutes.js";
 import { startSyncScheduler } from "./services/syncScheduler.js";
 
 dotenv.config();
@@ -47,6 +52,11 @@ app.use("/api/jobs", jobRoutes);
 app.use("/api/assistant", assistantRoutes);
 app.use("/api/deployments", deploymentRoutes);
 app.use("/api/pipelines", pipelineRoutes);
+app.use("/api/organizations", organizationRoutes);
+app.use("/api/workspaces", workspaceRoutes);
+app.use("/api", memberRoutes);
+app.use("/api/invitations", invitationRoutes);
+app.use("/api/audit", auditRoutes);
 
 app.get("/", (req, res) => {
   res.send("QAPilot API Running 🚀");

@@ -25,6 +25,11 @@ const Settings = lazy(() => import('../pages/Settings').then(module => ({ defaul
 const Jobs = lazy(() => import('../pages/Jobs').then(module => ({ default: module.Jobs })));
 const AssistantPage = lazy(() => import('../pages/AssistantPage').then(module => ({ default: module.AssistantPage })));
 const Deployments = lazy(() => import('../pages/Deployments').then(module => ({ default: module.Deployments })));
+const Organization = lazy(() => import('../pages/Organization').then(module => ({ default: module.Organization })));
+const Workspace = lazy(() => import('../pages/Workspace').then(module => ({ default: module.Workspace })));
+const Members = lazy(() => import('../pages/Members').then(module => ({ default: module.Members })));
+const Invitations = lazy(() => import('../pages/Invitations').then(module => ({ default: module.Invitations })));
+const AuditLogs = lazy(() => import('../pages/AuditLogs').then(module => ({ default: module.AuditLogs })));
 
 /** Premium placeholder screen shown for all Phase 3.2+ pages */
 function PlaceholderPage({ title, desc }) {
@@ -75,6 +80,11 @@ export function AppRoutes() {
         <Route path="/dashboard/jobs" element={<Jobs />} />
         <Route path="/dashboard/assistant" element={<AssistantPage />} />
         <Route path="/dashboard/deployments" element={<Deployments />} />
+        <Route path="/dashboard/organizations" element={<Organization />} />
+        <Route path="/dashboard/workspaces" element={<Workspace />} />
+        <Route path="/dashboard/members" element={<Members />} />
+        <Route path="/dashboard/invitations" element={<Invitations />} />
+        <Route path="/dashboard/audit" element={<AuditLogs />} />
         <Route path="/dashboard/settings" element={<Settings />} />
       </Route>
 
