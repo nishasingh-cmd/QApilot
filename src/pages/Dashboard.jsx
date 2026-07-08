@@ -7,8 +7,10 @@ import { RecentScansTable } from '../components/dashboard/RecentScansTable';
 import { AIInsightsCard } from '../components/dashboard/AIInsightsCard';
 import { ActivityTimeline } from '../components/dashboard/ActivityTimeline';
 import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 export function Dashboard() {
+  const { user } = useAuth();
   const [stats, setStats] = useState({
     totalRepositories: 8,
     activeRepositories: 12,
@@ -118,7 +120,7 @@ export function Dashboard() {
       >
         <div className="flex flex-col gap-1">
           <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">
-            Welcome back, Nisha 👋
+            Welcome back, {user ? user.name.split(' ')[0] : 'User'} 👋
           </h2>
           <p className="text-[13px] text-brand-text-secondary">
             Here's what's happening across your repositories today.

@@ -2,11 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, Settings, LogOut, CreditCard, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../../context/AuthContext';
 
 export function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -18,22 +20,36 @@ export function UserMenu() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  function handleLogout() {
+  async function handleLogout() {
     setIsOpen(false);
-    navigate('/');
+    await logout();
+    navigate('/login');
   }
+
+  const getInitials = () => {
+    if (!user || !user.name) return 'U';
+    const parts = user.name.split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return user.name.slice(0, 2).toUpperCase();
+  };
 
   return (
     <div className="relative" ref={containerRef}>
       {/* Avatar Trigger button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-9 h-9 rounded-xl bg-brand-blue/10 border border-brand-blue/30 flex items-center justify-center text-brand-blue font-black text-sm select-none hover:bg-brand-blue/20 hover:border-brand-blue/50 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+        className="w-9 h-9 rounded-xl bg-brand-blue/10 border border-brand-blue/30 flex items-center justify-center text-brand-blue font-black text-sm select-none hover:bg-brand-blue/20 hover:border-brand-blue/50 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue overflow-hidden"
         aria-label="User menu"
         aria-haspopup="true"
         aria-expanded={isOpen}
       >
-        NS
+        {user?.profileImage || user?.avatar ? (
+          <img src={user.profileImage || user.avatar} alt={user.name} className="w-full h-full object-cover" />
+        ) : (
+          getInitials()
+        )}
       </button>
 
       {/* Menu popup */}
@@ -48,8 +64,8 @@ export function UserMenu() {
           >
             {/* Header info */}
             <div className="px-2.5 py-2.5 border-b border-white/[0.06] select-none">
-              <p className="text-[13px] font-bold text-white leading-none">Nisha Singh</p>
-              <p className="text-[11px] text-brand-text-muted mt-1 leading-none">nisha@qapilot.io</p>
+              <p className="text-[13px] font-bold text-white leading-none">{user?.name || 'User'}</p>
+              <p className="text-[11px] text-brand-text-muted mt-1 leading-none">{user?.email}</p>
             </div>
 
             {/* Menu options */}

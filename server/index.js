@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
+import passport from "./config/passport.js";
 import githubRoutes from "./routes/githubRoutes.js";
 import repositoryRoutes from "./routes/repositoryRoutes.js";
 import scanRoutes from "./routes/scanRoutes.js";
@@ -60,6 +61,7 @@ app.use(cors({
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(passport.initialize());
 
 // routes
 app.use("/api/auth", authRoutes);

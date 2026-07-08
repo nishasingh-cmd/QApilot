@@ -5,10 +5,10 @@
  */
 export const authConfig = {
   // Toggle this flag to switch between dummy simulation and real backend API calls.
-  useMockAuth: true,
+  useMockAuth: false,
 
   // Base API endpoint URL (configured via environment variables or fallback to localhost)
-  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'https://api.qapilot.io/v1',
+  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
 
   // Authentication endpoints
   endpoints: {

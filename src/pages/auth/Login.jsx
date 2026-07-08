@@ -7,8 +7,10 @@ import { PasswordInput } from '../../components/ui/PasswordInput';
 import { LoadingButton } from '../../components/auth/LoadingButton';
 import { SocialButton } from '../../components/ui/SocialButton';
 import { authConfig } from '../../config/authConfig';
+import { useAuth } from '../../context/AuthContext';
 
 export function Login() {
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -48,7 +50,7 @@ export function Login() {
     return isValid;
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setApiError('');
     setApiSuccess('');
@@ -57,21 +59,21 @@ export function Login() {
 
     setIsLoading(true);
 
-    // Simulate API request delay
-    setTimeout(() => {
+    try {
+      const result = await login(email, password);
       setIsLoading(false);
-
-      // Dummy state check for testing error UI
-      if (email === 'error@qapilot.io') {
-        setApiError('Invalid credentials. Use error@qapilot.io to test errors, or any other email for success.');
-      } else {
+      if (result.success) {
         setApiSuccess('Successfully authenticated! Redirecting to workspace...');
-        // Wait a brief moment to let user see success UI before redirecting
         setTimeout(() => {
           navigate('/dashboard');
         }, 1000);
+      } else {
+        setApiError(result.error);
       }
-    }, authConfig.mockDelayMs);
+    } catch (error) {
+      setIsLoading(false);
+      setApiError('An unexpected error occurred. Please try again.');
+    }
   }
 
   const isFormValid = email && password && !emailError && !passwordError;
@@ -178,7 +180,7 @@ export function Login() {
           provider="github"
           onClick={() => {
             setApiSuccess('Redirecting to GitHub OAuth secure portal...');
-            setTimeout(() => window.location.assign('https://github.com'), 1000);
+            setTimeout(() => window.location.assign('http://localhost:5000/api/auth/github'), 1000);
           }}
           disabled={isLoading || !!apiSuccess}
         />
@@ -186,7 +188,7 @@ export function Login() {
           provider="google"
           onClick={() => {
             setApiSuccess('Redirecting to Google OAuth secure portal...');
-            setTimeout(() => window.location.assign('https://google.com'), 1000);
+            setTimeout(() => window.location.assign('http://localhost:5000/api/auth/google'), 1000);
           }}
           disabled={isLoading || !!apiSuccess}
         />

@@ -1,11 +1,33 @@
-import React, { useState, Suspense } from 'react';
-import { Outlet } from 'react-router-dom';
+import React, { useState, Suspense, useEffect } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { Sidebar } from '../dashboard/Sidebar';
 import { TopNavbar } from '../dashboard/TopNavbar';
 import { AnalyticsSkeleton } from '../analytics/AnalyticsSkeleton';
+import { useAuth } from '../../context/AuthContext';
+import { Loader2 } from 'lucide-react';
 
 export function DashboardLayout() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/login');
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="flex h-screen w-screen bg-brand-bg items-center justify-center">
+        <Loader2 size={36} className="text-brand-blue animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="flex h-screen w-screen bg-brand-bg text-brand-text-primary overflow-hidden font-sans relative">

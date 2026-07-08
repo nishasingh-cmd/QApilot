@@ -9,6 +9,8 @@ import { Signup } from '../pages/auth/Signup';
 import { ForgotPassword } from '../pages/auth/ForgotPassword';
 import { ResetPassword } from '../pages/auth/ResetPassword';
 import { VerifyEmail } from '../pages/auth/VerifyEmail';
+import { AuthCallbackSuccess } from '../pages/auth/AuthCallbackSuccess';
+import { AuthCallbackError } from '../pages/auth/AuthCallbackError';
 import { NotFound } from '../pages/NotFound';
 
 // Lazy-loaded premium dashboard modules
@@ -66,6 +68,8 @@ export function AppRoutes() {
       <Route path="/forgot-password" element={<AuthLayout><ForgotPassword /></AuthLayout>} />
       <Route path="/reset-password" element={<AuthLayout><ResetPassword /></AuthLayout>} />
       <Route path="/verify-email" element={<AuthLayout><VerifyEmail /></AuthLayout>} />
+      <Route path="/auth/success" element={<AuthLayout><AuthCallbackSuccess /></AuthLayout>} />
+      <Route path="/auth/error" element={<AuthLayout><AuthCallbackError /></AuthLayout>} />
 
 
       {/* Dashboard Layout Routes */}
