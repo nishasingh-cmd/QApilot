@@ -3,6 +3,7 @@ import { protect } from "../middleware/authMiddleware.js";
 import Repository from "../models/Repository.js";
 import Finding from "../models/Finding.js";
 import RepositoryFile from "../models/RepositoryFile.js";
+import Dependency from "../models/Dependency.js";
 import { getUserRepositories } from "../services/repositoryService.js";
 import { syncUserRepositories } from "../services/repositorySyncEngine.js";
 import { computeRepoMetrics } from "../services/repoMetricsService.js";
@@ -235,6 +236,116 @@ router.get("/:id/file/:fileId", protect, async (req, res) => {
     }
 
     res.json(file);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// POST /api/repositories/:id/dependencies/scan
+router.post("/:id/dependencies/scan", protect, async (req, res) => {
+  try {
+    const repo = await Repository.findOne({ _id: req.params.id, userId: req.user._id });
+    if (!repo) {
+      return res.status(404).json({ message: "Repository not found" });
+    }
+
+    const job = await dispatchJob("repository", "scan-dependencies", {
+      userId: req.user._id,
+      repositoryId: repo._id,
+      type: "dependencies"
+    });
+
+    res.json({
+      message: "Dependency scan task enqueued successfully",
+      jobId: job.jobId,
+      status: job.status
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/repositories/:id/dependencies
+router.get("/:id/dependencies", protect, async (req, res) => {
+  try {
+    const repo = await Repository.findOne({ _id: req.params.id, userId: req.user._id });
+    if (!repo) {
+      return res.status(404).json({ message: "Repository not found" });
+    }
+
+    const dependencies = await Dependency.find({ repositoryId: repo._id }).sort({ name: 1 });
+    res.json(dependencies);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/repositories/:id/dependencies/summary
+router.get("/:id/dependencies/summary", protect, async (req, res) => {
+  try {
+    const repo = await Repository.findOne({ _id: req.params.id, userId: req.user._id });
+    if (!repo) {
+      return res.status(404).json({ message: "Repository not found" });
+    }
+
+    const dependencies = await Dependency.find({ repositoryId: repo._id }).lean();
+
+    const totalCount = dependencies.length;
+    const outdatedCount = dependencies.filter((d) => d.isOutdated).length;
+
+    let vulnerabilityCount = 0;
+    const vulnerabilities = [];
+    
+    // License breakdown
+    const licensesMap = {};
+
+    dependencies.forEach((d) => {
+      // Licenses count
+      const lic = d.license || "Unknown";
+      licensesMap[lic] = (licensesMap[lic] || 0) + 1;
+
+      // Vulnerabilities count and details
+      if (d.knownVulnerabilities && d.knownVulnerabilities.length > 0) {
+        vulnerabilityCount += d.knownVulnerabilities.length;
+        d.knownVulnerabilities.forEach((v) => {
+          vulnerabilities.push({
+            packageName: d.name,
+            currentVersion: d.currentVersion,
+            cveId: v.cveId,
+            severity: v.severity,
+            description: v.description,
+            fixedVersion: v.fixedVersion,
+            referenceUrl: v.referenceUrl
+          });
+        });
+      }
+    });
+
+    const licenses = Object.keys(licensesMap).map((name) => ({
+      name,
+      count: licensesMap[name]
+    })).sort((a, b) => b.count - a.count);
+
+    // Risk score calculation (0 - 100)
+    let riskScore = 100;
+    const criticals = vulnerabilities.filter(v => v.severity === 'critical').length;
+    const highs = vulnerabilities.filter(v => v.severity === 'high').length;
+    const others = vulnerabilities.filter(v => v.severity !== 'critical' && v.severity !== 'high').length;
+
+    riskScore -= (criticals * 15);
+    riskScore -= (highs * 10);
+    riskScore -= (others * 4);
+    riskScore -= (outdatedCount * 2);
+    riskScore = Math.max(10, Math.min(100, riskScore));
+
+    res.json({
+      totalCount,
+      outdatedCount,
+      vulnerabilityCount,
+      riskScore,
+      licenses,
+      vulnerabilities
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

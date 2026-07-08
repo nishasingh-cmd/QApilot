@@ -2,10 +2,11 @@ import { Worker } from "bullmq";
 import { connection } from "../config/redis.js";
 import { syncUserRepositories } from "../services/repositorySyncEngine.js";
 import { syncRepositoryFiles } from "../services/repositoryFileService.js";
+import { scanDependencies } from "../services/dependencyScanner.js";
 import Job from "../models/Job.js";
 
 /**
- * Synchronize repository configuration from the GitHub API, or perform recursive file syncing.
+ * Synchronize repository configuration from the GitHub API, or perform recursive file / dependency syncing.
  */
 export const processRepositoryJob = async (data, updateProgress) => {
   const { userId, repositoryId, type } = data;
@@ -13,6 +14,11 @@ export const processRepositoryJob = async (data, updateProgress) => {
   if (type === "filesync") {
     console.log(`Processing file synchronization for repository: ${repositoryId}`);
     return await syncRepositoryFiles(repositoryId, updateProgress);
+  }
+
+  if (type === "dependencies") {
+    console.log(`Processing dependency scanner for repository: ${repositoryId}`);
+    return await scanDependencies(repositoryId, updateProgress);
   }
 
   await updateProgress(20);

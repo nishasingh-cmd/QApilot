@@ -173,18 +173,26 @@ export function RepositoryDetail() {
           </div>
         </div>
 
-        <button
-          onClick={triggerFileSync}
-          disabled={syncing}
-          className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-2 ${
-            syncing
-              ? 'bg-brand-blue/10 border-brand-blue/20 text-brand-blue/50 cursor-not-allowed'
-              : 'bg-brand-blue hover:bg-brand-blue-hover text-white border-white/[0.08]'
-          }`}
-        >
-          <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} />
-          {syncing ? `Syncing ${summary?.syncProgress || 0}%` : 'Sync Files'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate(`/dashboard/repos/${id}/dependencies`)}
+            className="px-4 py-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] text-brand-text-secondary hover:text-white border border-white/[0.06] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            Dependency Scanner
+          </button>
+          <button
+            onClick={triggerFileSync}
+            disabled={syncing}
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-2 ${
+              syncing
+                ? 'bg-brand-blue/10 border-brand-blue/20 text-brand-blue/50 cursor-not-allowed'
+                : 'bg-brand-blue hover:bg-brand-blue-hover text-white border-white/[0.08]'
+            }`}
+          >
+            <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} />
+            {syncing ? `Syncing ${summary?.syncProgress || 0}%` : 'Sync Files'}
+          </button>
+        </div>
       </div>
 
       {/* Sync Status Alert Banner */}

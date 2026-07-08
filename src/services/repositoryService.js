@@ -1,7 +1,7 @@
 /**
  * Repository integration service.
  * Connects the frontend to the QAPilot backend for database integrations,
- * configurations, and recursive file synchronizations.
+ * configurations, recursive file synchronizations, and dependency scans.
  */
 import axios from 'axios';
 
@@ -65,6 +65,30 @@ export const repositoryService = {
    */
   getFileContent: async (id, fileId) => {
     const res = await axios.get(`${API_BASE}/repositories/${id}/file/${fileId}`, { withCredentials: true });
+    return res.data;
+  },
+
+  /**
+   * Enqueues a background dependency and vulnerability scan job.
+   */
+  scanDependencies: async (id) => {
+    const res = await axios.post(`${API_BASE}/repositories/${id}/dependencies/scan`, {}, { withCredentials: true });
+    return res.data;
+  },
+
+  /**
+   * Retrieves the list of parsed dependencies for a repository.
+   */
+  getDependencies: async (id) => {
+    const res = await axios.get(`${API_BASE}/repositories/${id}/dependencies`, { withCredentials: true });
+    return res.data;
+  },
+
+  /**
+   * Retrieves the summary counts, risk scores, and licenses for repository dependencies.
+   */
+  getDependenciesSummary: async (id) => {
+    const res = await axios.get(`${API_BASE}/repositories/${id}/dependencies/summary`, { withCredentials: true });
     return res.data;
   }
 };
