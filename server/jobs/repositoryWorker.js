@@ -1,15 +1,21 @@
 import { Worker } from "bullmq";
 import { connection } from "../config/redis.js";
 import { syncUserRepositories } from "../services/repositorySyncEngine.js";
+import { syncRepositoryFiles } from "../services/repositoryFileService.js";
 import Job from "../models/Job.js";
 
 /**
- * Synchronize repository configuration from the GitHub API.
+ * Synchronize repository configuration from the GitHub API, or perform recursive file syncing.
  */
 export const processRepositoryJob = async (data, updateProgress) => {
-  const { userId } = data;
-  await updateProgress(20);
+  const { userId, repositoryId, type } = data;
 
+  if (type === "filesync") {
+    console.log(`Processing file synchronization for repository: ${repositoryId}`);
+    return await syncRepositoryFiles(repositoryId, updateProgress);
+  }
+
+  await updateProgress(20);
   const synced = await syncUserRepositories(userId);
   await updateProgress(100);
 

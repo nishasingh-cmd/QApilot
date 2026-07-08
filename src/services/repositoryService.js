@@ -1,12 +1,16 @@
 /**
- * Mock repository integration service.
- * Simulates importing repositories and saving configuration profiles with realistic delays.
- * Will be replaced by real API calls to the QAPilot backend in future phases.
+ * Repository integration service.
+ * Connects the frontend to the QAPilot backend for database integrations,
+ * configurations, and recursive file synchronizations.
  */
+import axios from 'axios';
+
+const API_BASE = 'http://localhost:5000/api';
 
 export const repositoryService = {
   /**
-   * Simulates importing selected repositories into user workspace
+   * Simulates importing selected repositories into user workspace.
+   * Kept for local UI integrations.
    */
   importRepositories: (repos) => {
     return new Promise((resolve) => {
@@ -30,7 +34,7 @@ export const repositoryService = {
   },
 
   /**
-   * Simulates saving project scan configuration profiles
+   * Simulates saving project scan configuration profiles.
    */
   saveConfiguration: (config) => {
     return new Promise((resolve) => {
@@ -39,5 +43,30 @@ export const repositoryService = {
       }, 1000);
     });
   },
+
+  /**
+   * Enqueues a background files sync job for a connected repository.
+   */
+  syncFiles: async (id) => {
+    const res = await axios.post(`${API_BASE}/repositories/${id}/sync-files`, {}, { withCredentials: true });
+    return res.data;
+  },
+
+  /**
+   * Retrieves the complete files metadata listing and summaries for a repository.
+   */
+  getFiles: async (id) => {
+    const res = await axios.get(`${API_BASE}/repositories/${id}/files`, { withCredentials: true });
+    return res.data;
+  },
+
+  /**
+   * Retrieves the complete metadata and content of a specific file.
+   */
+  getFileContent: async (id, fileId) => {
+    const res = await axios.get(`${API_BASE}/repositories/${id}/file/${fileId}`, { withCredentials: true });
+    return res.data;
+  }
 };
+
 export default repositoryService;

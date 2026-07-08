@@ -16,6 +16,7 @@ import { NotFound } from '../pages/NotFound';
 // Lazy-loaded premium dashboard modules
 const Dashboard = lazy(() => import('../pages/Dashboard').then(module => ({ default: module.Dashboard })));
 const Repositories = lazy(() => import('../pages/Repositories').then(module => ({ default: module.Repositories })));
+const RepositoryDetail = lazy(() => import('../pages/RepositoryDetail').then(module => ({ default: module.RepositoryDetail })));
 const ConnectGithub = lazy(() => import('../pages/ConnectGithub').then(module => ({ default: module.ConnectGithub })));
 const Scans = lazy(() => import('../pages/Scans').then(module => ({ default: module.Scans })));
 const Findings = lazy(() => import('../pages/Findings').then(module => ({ default: module.Findings })));
@@ -77,6 +78,7 @@ export function AppRoutes() {
         <Route path="/dashboard" element={<Dashboard />} />
         {/* Phase 3.2+ content — premium pages */}
         <Route path="/dashboard/repos" element={<Repositories />} />
+        <Route path="/dashboard/repos/:id" element={<RepositoryDetail />} />
         <Route path="/dashboard/connect-github" element={<ConnectGithub />} />
         <Route path="/dashboard/scans" element={<Scans />} />
         <Route path="/dashboard/bugs" element={<Findings />} />

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
 import { CONNECTED_REPOS, AVAILABLE_REPOS } from '../data/repositories';
 import { RepositoryStats } from '../components/repositories/RepositoryStats';
 import { RepositorySearch } from '../components/repositories/RepositorySearch';
@@ -23,9 +24,38 @@ export function Repositories() {
   const [sortBy, setSortBy] = useState('newest');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Sync state if importedRepos changes
+  // Sync state and load from MERN database
   useEffect(() => {
-    setConnected([...importedRepos, ...CONNECTED_REPOS]);
+    let active = true;
+    async function fetchRepos() {
+      try {
+        const res = await axios.get('http://localhost:5000/api/repositories', { withCredentials: true });
+        if (res.data && active) {
+          const mapped = res.data.map(repo => ({
+            ...repo,
+            id: repo._id,
+            owner: repo.owner?.login || repo.fullName?.split('/')[0] || 'owner',
+            visibility: repo.private ? 'private' : 'public',
+            branch: repo.defaultBranch || 'main',
+            status: repo.syncStatus === 'syncing' ? 'scanning' : (repo.syncStatus === 'synced' ? 'healthy' : 'attention'),
+            aiCoverage: repo.healthScore || 100,
+            openIssues: repo.openFindings || 0,
+            deploymentStatus: 'success',
+            recentActivity: repo.syncStatus === 'syncing' ? `Syncing files... ${repo.syncProgress}%` : (repo.lastSyncedAt ? `Last synced: ${new Date(repo.lastSyncedAt).toLocaleString()}` : 'Not synced yet')
+          }));
+          setConnected(mapped.length > 0 ? mapped : CONNECTED_REPOS);
+        }
+      } catch (err) {
+        console.error('Failed to load repositories:', err);
+      }
+    }
+    fetchRepos();
+    const interval = setInterval(fetchRepos, 4000);
+
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
   }, [importedRepos]);
 
   // Handle connecting a repo from the modal
@@ -54,29 +84,16 @@ export function Repositories() {
     setAvailable((prev) => prev.filter((r) => r.id !== repo.id));
   };
 
-  // Simulate repository scan trigger
-  const handleScanRepo = (repo) => {
-    // Set to scanning
-    setConnected((prev) =>
-      prev.map((r) => (r.id === repo.id ? { ...r, status: 'scanning', recentActivity: 'AI Scan started...' } : r))
-    );
-
-    // Simulate completion
-    setTimeout(() => {
+  // Trigger files sync enqueuing on backend
+  const handleScanRepo = async (repo) => {
+    try {
+      await axios.post(`http://localhost:5000/api/repositories/${repo.id || repo._id}/sync-files`, {}, { withCredentials: true });
       setConnected((prev) =>
-        prev.map((r) =>
-          r.id === repo.id
-            ? {
-                ...r,
-                status: 'healthy',
-                lastScan: 'Just now',
-                healthScore: Math.min(100, r.healthScore + Math.floor(Math.random() * 5)),
-                recentActivity: 'AI Scan complete — 0 security vulnerabilities found',
-              }
-            : r
-        )
+        prev.map((r) => (r.id === repo.id ? { ...r, status: 'scanning', recentActivity: 'Syncing files enqueued...' } : r))
       );
-    }, 4000);
+    } catch (err) {
+      console.error('Failed to trigger scan sync:', err);
+    }
   };
 
   const handleSettingsRepo = (repo) => {
@@ -84,7 +101,7 @@ export function Repositories() {
   };
 
   const handleViewRepo = (repo) => {
-    alert(`Opening scan dashboard details for ${repo.fullName} coming in next phase.`);
+    navigate(`/dashboard/repos/${repo.id || repo._id}`);
   };
 
   // Filter & Search logic
