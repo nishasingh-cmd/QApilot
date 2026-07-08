@@ -1,7 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { GitBranch, Clock, RefreshCw, AlertCircle, CheckCircle2, User } from 'lucide-react';
 
 export function ScanHistoryTable({ history, onRetry, loading }) {
+  const navigate = useNavigate();
   return (
     <div className="w-full rounded-2xl border border-white/[0.06] bg-white/[0.01] overflow-hidden">
       <div className="p-4 border-b border-white/[0.06] flex items-center justify-between bg-white/[0.005]">
@@ -86,11 +88,17 @@ export function ScanHistoryTable({ history, onRetry, loading }) {
                         </span>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 text-right">
+                    <td className="py-3.5 px-4 text-right flex justify-end items-center gap-2">
+                      <button
+                        onClick={() => navigate(`/dashboard/scans/${run.id}`)}
+                        className="px-2.5 py-1.5 rounded-lg bg-brand-blue hover:bg-[#3d7eff] text-white text-[10.5px] font-bold border border-white/[0.08] transition-all cursor-pointer"
+                      >
+                        View Results
+                      </button>
                       <button
                         onClick={() => onRetry && onRetry(run.id)}
                         disabled={loading}
-                        className="p-1.5 rounded-lg bg-white/[0.02] hover:bg-white/[0.08] text-brand-text-secondary hover:text-white border border-white/[0.04] transition-all"
+                        className="p-1.5 rounded-lg bg-white/[0.02] hover:bg-white/[0.08] text-brand-text-secondary hover:text-white border border-white/[0.04] transition-all cursor-pointer"
                         aria-label="Retry scan"
                       >
                         <RefreshCw className="w-3.5 h-3.5" />

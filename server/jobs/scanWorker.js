@@ -36,6 +36,15 @@ export const processScanJob = async (data, updateProgress) => {
   scan.findings = result.findings;
   scan.status = "success";
   scan.elapsedTime = elapsed;
+  
+  // Save AST Analysis scores and metrics
+  scan.complexity = result.complexity;
+  scan.technicalDebt = result.technicalDebt;
+  scan.maintainabilityIndex = result.maintainabilityIndex;
+  scan.duplicatedLines = result.duplicatedLines;
+  scan.codeSmells = result.codeSmells;
+  scan.overallGrade = result.overallGrade;
+
   await scan.save();
   await updateProgress(70);
 

@@ -28,7 +28,16 @@ const scanSchema = new mongoose.Schema(
         severity: { type: String, required: true }, // e.g., 'critical', 'warning', 'info'
         file: { type: String, required: true },
         message: { type: String, required: true },
-        recommendation: { type: String, required: true }
+        recommendation: { type: String, required: true },
+        
+        // Extended structured fields for AST engine
+        title: { type: String, default: "" },
+        category: { type: String, default: "" },
+        confidence: { type: String, default: "medium" },
+        line: { type: Number, default: 1 },
+        column: { type: Number, default: 1 },
+        ruleId: { type: String, default: "" },
+        codeSnippet: { type: String, default: "" }
       }
     ],
     status: {
@@ -39,6 +48,32 @@ const scanSchema = new mongoose.Schema(
     elapsedTime: {
       type: Number,
       default: 0
+    },
+    
+    // AST Analysis scoring metrics
+    complexity: {
+      type: Number,
+      default: 0
+    },
+    technicalDebt: {
+      type: Number,
+      default: 0 // In minutes
+    },
+    maintainabilityIndex: {
+      type: Number,
+      default: 0 // 0 - 100
+    },
+    duplicatedLines: {
+      type: Number,
+      default: 0
+    },
+    codeSmells: {
+      type: Number,
+      default: 0
+    },
+    overallGrade: {
+      type: String,
+      default: "A"
     }
   },
   { timestamps: true }
