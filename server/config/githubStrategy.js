@@ -4,9 +4,9 @@ import { encrypt } from "../utils/encryption.js";
 
 export const githubStrategy = new GitHubStrategy(
   {
-    clientID: process.env.GITHUB_CLIENT_ID || "dummy_github_client_id",
-    clientSecret: process.env.GITHUB_CLIENT_SECRET || "dummy_github_client_secret",
-    callbackURL: process.env.GITHUB_CALLBACK_URL || "http://localhost:5000/api/auth/github/callback",
+    clientID: process.env.GITHUB_CLIENT_ID,
+    clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    callbackURL: process.env.GITHUB_CALLBACK_URL,
   },
   async (accessToken, refreshToken, profile, done) => {
     try {

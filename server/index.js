@@ -1,4 +1,29 @@
 import "dotenv/config";
+
+const requiredEnv = [
+  "GOOGLE_CLIENT_ID",
+  "GOOGLE_CLIENT_SECRET",
+  "GITHUB_CLIENT_ID",
+  "GITHUB_CLIENT_SECRET",
+  "JWT_SECRET",
+  "FRONTEND_URL",
+  "BACKEND_URL"
+];
+
+for (const key of requiredEnv) {
+  const val = process.env[key];
+  if (!val) {
+    throw new Error(`Critical Error: Required environment variable ${key} is missing.`);
+  }
+  const isPlaceholder = val.startsWith("your_") || val.startsWith("dummy_") || val === "replace_with_64_char_random_hex_string" || val === "replace_with_32_char_random_string";
+  if (isPlaceholder) {
+    throw new Error(`Critical Error: Environment variable ${key} contains a placeholder value ("${val}"). Please configure real credentials.`);
+  }
+}
+
+console.log("Google Client Loaded ✓");
+console.log("GitHub Client Loaded ✓");
+
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
