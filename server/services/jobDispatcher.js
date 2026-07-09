@@ -8,6 +8,7 @@ import { processAnalyticsJob } from "../jobs/analyticsWorker.js";
 import { processReportJob } from "../jobs/reportWorker.js";
 import { processNotificationJob } from "../jobs/notificationWorker.js";
 import { processDeploymentJob } from "../jobs/deploymentWorker.js";
+import { processCodeReviewJob } from "../jobs/codeReviewWorker.js";
 
 // Mapping inline workers
 const processJobMap = {
@@ -16,7 +17,8 @@ const processJobMap = {
   analytics: processAnalyticsJob,
   report: processReportJob,
   notification: processNotificationJob,
-  deployment: processDeploymentJob
+  deployment: processDeploymentJob,
+  codeReview: processCodeReviewJob
 };
 
 /**

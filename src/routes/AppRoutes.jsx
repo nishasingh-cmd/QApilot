@@ -29,6 +29,7 @@ const Activity = lazy(() => import('../pages/Activity').then(module => ({ defaul
 const Settings = lazy(() => import('../pages/Settings').then(module => ({ default: module.Settings })));
 const Jobs = lazy(() => import('../pages/Jobs').then(module => ({ default: module.Jobs })));
 const AssistantPage = lazy(() => import('../pages/AssistantPage').then(module => ({ default: module.AssistantPage })));
+const AiReview = lazy(() => import('../pages/AiReview').then(module => ({ default: module.AiReview })));
 const Deployments = lazy(() => import('../pages/Deployments').then(module => ({ default: module.Deployments })));
 const Organization = lazy(() => import('../pages/Organization').then(module => ({ default: module.Organization })));
 const Workspace = lazy(() => import('../pages/Workspace').then(module => ({ default: module.Workspace })));
@@ -94,6 +95,7 @@ export function AppRoutes() {
         <Route path="/dashboard/activity" element={<Activity />} />
         <Route path="/dashboard/jobs" element={<Jobs />} />
         <Route path="/dashboard/assistant" element={<AssistantPage />} />
+        <Route path="/dashboard/review" element={<AiReview />} />
         <Route path="/dashboard/deployments" element={<Deployments />} />
         <Route path="/dashboard/organizations" element={<Organization />} />
         <Route path="/dashboard/workspaces" element={<Workspace />} />

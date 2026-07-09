@@ -46,6 +46,47 @@ export const generateMockResponse = async (prompt) => {
       productivityObservations: "Pushes and PR scoring are highly active. Remediations are closing 40% faster than sync delays.",
       riskPredictions: "High dependency churn represents the primary threat vector. Run routine audits."
     });
+  if (prompt.includes("Principal Engineering Lead") || prompt.includes("Code Quality Review")) {
+    return JSON.stringify({
+      summary: "This is a mock code review summary. The file looks well structured overall, with a few issues identified: one critical SQL injection vulnerability and two warning recommendations for better performance and readability.",
+      overallScore: 84,
+      securityScore: 78,
+      performanceScore: 90,
+      maintainabilityScore: 85,
+      readabilityScore: 82,
+      comments: [
+        {
+          line: 8,
+          severity: "critical",
+          category: "security",
+          title: "SQL Injection Vulnerability",
+          description: "Unsanitized user inputs are concatenated directly into SQL execution strings. Attackers could exploit this to perform SQL injection and manipulate the query structure.",
+          recommendation: "Use parameterized queries or prepared statements.",
+          suggestedCode: "const query = 'SELECT * FROM users WHERE id = ?';\nconst [rows] = await db.execute(query, [userId]);",
+          confidence: "high"
+        },
+        {
+          line: 15,
+          severity: "warning",
+          category: "performance",
+          title: "Avoid sync fs calls in async paths",
+          description: "Using fs.readFileSync inside express handlers blocks the event loop, decreasing application throughput under load.",
+          recommendation: "Use fs.promises.readFile instead.",
+          suggestedCode: "const data = await fs.promises.readFile(path, 'utf8');",
+          confidence: "high"
+        },
+        {
+          line: 22,
+          severity: "info",
+          category: "readability",
+          title: "Use clear variable naming conventions",
+          description: "Variable 'd' is short and cryptic, which hampers read complexity and codebase onboarding.",
+          recommendation: "Rename 'd' to 'userData' or 'detailedResults'.",
+          suggestedCode: "const userData = await fetchUser();",
+          confidence: "medium"
+        }
+      ]
+    });
   }
 
   // Fallback for Chat Assistant

@@ -30,6 +30,7 @@ const MENU_ITEMS = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
   { name: 'Repositories', icon: FolderGit2, path: '/dashboard/repos' },
   { name: 'AI Scans', icon: Zap, path: '/dashboard/scans' },
+  { name: 'AI Review', icon: Bot, path: '/dashboard/review' },
   { name: 'AI Findings', icon: ShieldAlert, path: '/dashboard/bugs' },
   { name: 'AI Reports', icon: FileText, path: '/dashboard/reports' },
   { name: 'Test Runs', icon: Terminal, path: '/dashboard/runs' },
