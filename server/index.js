@@ -1,6 +1,6 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
@@ -34,7 +34,6 @@ import { rateLimiter, nosqlSanitize, securityHeaders } from "./middleware/securi
 import errorHandler from "./middleware/errorHandler.js";
 import { startSyncScheduler } from "./services/syncScheduler.js";
 
-dotenv.config();
 connectDB();
 
 const app = express();

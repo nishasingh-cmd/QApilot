@@ -46,6 +46,7 @@ export const generateMockResponse = async (prompt) => {
       productivityObservations: "Pushes and PR scoring are highly active. Remediations are closing 40% faster than sync delays.",
       riskPredictions: "High dependency churn represents the primary threat vector. Run routine audits."
     });
+  }
   if (prompt.includes("Principal Engineering Lead") || prompt.includes("Code Quality Review")) {
     return JSON.stringify({
       summary: "This is a mock code review summary. The file looks well structured overall, with a few issues identified: one critical SQL injection vulnerability and two warning recommendations for better performance and readability.",
